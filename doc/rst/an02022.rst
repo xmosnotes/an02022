@@ -1,0 +1,672 @@
+.. _xcore_ai_clock_frequency_control:
+
+xcore.ai Clock Frequency Control
+================================
+
+.. _xcore_ai_clock_frequency_pll_clock_divider_overview:
+
+PLL and Clock Divider Overview
+------------------------------
+
+xcore.ai chips have two internal phase locked loops (PLLs): the System PLL
+(sometimes known as the Core PLL or Primary PLL) and the Secondary PLL
+(sometimes known as the Application PLL). Both PLLs share the
+same internal workings.
+
+The System PLL is driven from a low frequency
+external clock and its output is used to obtain a high frequency system
+clock. A set of clock dividers are then used on the system clock
+to derive the clocks for the xCORE tiles, the switch and the reference
+clock. The Secondary PLL can be used for application purposes, and is
+driven either from the same external clock source, or from the System PLL.
+
+.. _xcore_ai_clock_frequency_control_clock_dividers:
+
+.. figure:: images/meta-drawing-clock-tree.*
+   :scale: 75%
+
+   PLL and Clock Dividers
+
+The System PLL has fixed initial settings. They allow an 8-30MHz external clock to
+be used and operate the xCORE tiles at 133-500MHz respectively. Typically, however,
+the PLL is reprogrammed on boot in order to set the PLL to the desired
+output frequency. The XMOS tools can be used to reprogram the PLL
+automatically by specifying the application's static clock configuration in the *XN file*.
+
+Note that throughout this document we assume that a clock is supplied on
+the XIN pin. Instead of supplying a clock directly on XIN, one can instead
+use a crystal on XIN/XOUT, as specified in the datasheet.
+
+.. _xcore_ai_clock_frequency_pll_clock_constraints:
+
+PLL Constraints
++++++++++++++++
+
+There are a number of constraints on the frequencies of clocks at different
+points on the xcore.ai devices. These constraints must be met for the
+initial boot sequence, and if either PLL is reprogrammed, for the reprogrammed
+values too:
+
+* The input clock on XIN must be between 8 and 30 MHz
+
+  If you use a crystal, use a 24 or 25 MHz crystal depending on your application.
+
+* VCO frequency must be between 360 and 1800 MHz.
+
+* The device has a maximum operating frequency, which is specified in the
+  datasheet for the device.
+
+* The tile frequency should not be less than the reference frequency.
+
+.. _xcore_ai_clock_frequency_pll_settings:
+
+Fundamentals of the PLL
++++++++++++++++++++++++
+
+There are three dividers within the PLL. *R* divides the input clock down.
+The next divider, *F*, divides the output of the voltage controlled
+oscillator (VCO) stage down to the same frequency as the output of the *R*
+divider; hence *F* acts as a multiplier. *R* and *F* together determine the
+ratio between the VCO frequency and the input frequency. The output divider
+*OD* divides the VCO to form the output clock of the PLL.
+
+  * f :sub:`vco` = (F + 1)/2 x 1 / (R+1) x f :sub:`in`
+
+  * f :sub:`out` = f :sub:`vco` / (OD + 1)
+
+Note that the value *1* is added to each of *F*, *R*, and *OD*.
+
+Static configuration of the PLLs through the XN File
+----------------------------------------------------
+
+For the vast majority of applications, you can use the tools to set up the
+PLLs. The application's
+input oscillator frequency, system frequency, reference frequency and secondary frequency can be
+specified in the XN file. When the application code is written to a flash
+device with XFLASH, the code to reprogram the PLL to the desired system and
+reference frequencies will be added automatically into the boot sequence.
+When run with XRUN or XGDB the PLL is automatically reprogrammed via JTAG.
+
+.. table:: XN File Frequency Control Attributes
+
+   ================== ======= =================================================
+   Attribute          Default Description
+   ================== ======= =================================================
+   Oscillator         none    Input frequency on the XIN pin. If this
+                              attribute is specified, the system frequency
+                              and the reference frequency are programmed using 
+                              their specified (or default) values. If this
+                              attribute is not specified, the boot
+                              configuration
+                              for the system and reference frequencies are used
+                              for the application.
+   ------------------ ------- -------------------------------------------------
+   SystemFrequency    500 Mhz The desired system frequency. The
+                              *Oscillator* attribute must be specified
+                              if this attribute is specified.
+   ------------------ ------- -------------------------------------------------
+   ReferenceFrequency 100 Mhz The desired reference frequency. The
+                              *Oscillator* attribute must be specified
+                              if this attribute is specified.
+   ------------------ ------- -------------------------------------------------
+   SecondaryFrequency none    If present, will cause SecondaryPLL to be
+                              configured by the tools. It will
+                              not configure the fractional divider. The
+                              tools will choose the closest frequency
+                              possible without using the fractional
+                              divider. The
+                              *Oscillator* attribute must be specified
+                              if this attribute is specified.
+   ================== ======= =================================================
+
+The frequency control attributes should be added to the Node node within
+the XN file. Frequencies should be specified with their unit of MHz, kHz or
+Hz, (for example 500MHz, 24576kHz or 6745800Hz). If the frequency control
+attributes are not specified in the XN file, then the xTIMEcomposer tools
+will not modify the frequency control registers.
+
+If the target frequency specified in the XN file for the system, reference or secondary
+frequency cannot be met exactly for the application's input
+frequency, a frequency close to the target frequency will be selected by
+the tools and a warning will be issued. XFLASH always issues the warning
+when it occurs, as does XGDB. XRUN only issues the warning if it has been
+run with the ``--verbose`` switch. XGDB issues the warning when the
+``connect`` command is issued.
+
+An Example XN file using frequency control attributes is the following::
+
+  <?xml version="1.0" encoding="UTF-8"?>
+  <Network xmlns="http://www.xmos.com"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
+    <Type>Board</Type>
+    <Name>xcore.ai Explorer Kit</Name>
+  
+    <Declarations>
+      <Declaration>tileref tile[2]</Declaration>
+    </Declarations>
+  
+    <Packages>
+      <Package id="0" Type="XS3-UnA-1024-FB265">
+        <Nodes>
+          <Node Id="0" InPackageId="0" Type="XS3-L16A-1024"
+                SystemFrequency="500MHz"
+                ReferenceFrequency="100MHz"
+                Oscillator="20Mhz">
+            <Tile Number="0" Reference="tile[0]"/>
+            <Tile Number="1" Reference="tile[1]"/>
+          </Node>
+        </Nodes>
+      </Package>
+    </Packages>
+    <JTAGChain>
+      <JTAGDevice NodeId="0"/>
+    </JTAGChain>  
+  </Network>
+
+Configuration of LPDDR clock frequency
+++++++++++++++++++++++++++++++++++++++
+
+If an LPDDR memory is used, then its clock frequency can be configured by adding a
+Frequency attribute to the *ExtMem* external memory specification. The tools automatically
+decide how to set the LPDDR divider and its mux to achieve the desired frequency:
+
+  * If the SystemPLL (nor the SecondaryPLL if supplied) cannot be used to
+    perfectly achieve the desired ExtMem Frequency, a warning and advice
+    message will be raised
+
+  * If the ExtMem Frequency can be perfectly achieved from either the
+    SystemPLL or the SecondaryPLL, the SystemPLL will be chosen. This
+    decision "frees up" the SecondaryPLL for application, rather than
+    system usage.
+
+See the application note on adding external memory,
+`xcore.ai External LPDDR-1 Memory <http://www.xmos.com/?s=XM-014230-AN>`_,
+for details.
+
+.. _xcore_ai_clock_frequency_pll_configuring_device:
+
+Configuring the system PLL of xcore.ai manually
+-----------------------------------------------
+
+The initial System PLL settings used after reset are:
+
+* *R = 0*, no input divider
+
+* *F = 99*, multiply by *(99+1)/2 = 50*
+
+* *OD = 2*, output division by *(2+1) = 3*
+
+This results in a multiplier of *50/3 = 16.667*. The minimum clock
+frequency allowed on the XIN pin is 8 MHz, which multiplies up to a 133 MHz
+clock. The maximum clock frequency allowed on XIN is 30 MHz, which
+multiplies up to a system clock of 500 MHz.
+
+If a different PLL configuration is required, and you want to configure the
+PLL manually, then the new settings should be
+written to the PLL_CTRL register. The PLL_CTRL register has two bits that
+control how the new values are applied: an *nreset* bit and an *nlock* bit,
+at bit numbers XS1_SS_PLL_CTL_NRESET_SHIFT (31) and
+XS1_SS_PLL_CTL_NLOCK_SHIFT (30). Both bits are active low:
+
+* By default, with both bits low, the chip will reset and the same boot
+  code will execute again. It is important, therefore, that the boot code
+  should read the value of the PLL_CTRL register and compare it to the
+  reconfigured value. If there is a difference, then this is the first time
+  the boot code has executed and the new PLL settings should be written to
+  PLL_CTRL, causing a reset. The second time the boot code executes, the
+  value read back from the PLL_CTRL register will be the reconfigured value
+  and the boot process can continue without setting the PLL.
+
+* If the *nreset* bit is set high and the *nlock* bit is set low, then the
+  PLL clock will be suspended whilst the PLL adapts to the new settings.
+  During this time, the chip will not have a clock, and it will be inactive
+  for a short period of time (a few microseconds).
+
+* If both *nreset* and *nlock* bits are high, then the PLL will adapt whilst
+  the chip is running. This means that the clock will be imprecise for a
+  short period of time (a few microseconds).
+
+The last mode shall only be used if a small change is made to *F*; any change
+of more than 5% requires at least one of the *nlock* or *nreset* bits to be cleared.
+
+The easiest way to reprogram the PLL is to specify the application's
+frequency requirements in the XN file and use the XMOS tools to reprogram
+the PLL, as discussed before.
+
+.. _xcore_ai_clock_frequency_pll_frequency_control_registers:
+
+Frequency Control Registers for the System Frequency
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+To access the frequency control registers on the *SSwitch* and *PSwitch*, packets of data must be constructed and communicated to the switches through a channel end.
+
+Global PLL settings are controlled through the
+*Node Configuration Registers*.
+From C or XC, use the *write_node_config_reg()* and
+*read_node_config_reg()* functions defined in *xs1.h*.
+
+The fields that can be set in the *Node Configuration Registers* that
+control the clocks are shown in the table below. Register 6
+controls the PLL settings, registers 7 and 8 control the
+dividers for the switch and the reference clock:
+
+.. tabularcolumns:: lp{5em}rrp{5.5cm}
+                    
+======= =========== ======== ===== ==============================================
+Field   Register    Bits     Reset Description
+======= =========== ======== ===== ==============================================
+NRESET  6: SSCTRL   31       0     Do not reset on write
+        PLL_CTRL
+------- ----------- -------- ----- ----------------------------------------------
+NLOCK   6: SSCTRL   30       0     Do not wait for PLL to be locked
+        PLL_CTRL
+------- ----------- -------- ----- ----------------------------------------------
+JTAG    6: SSCTRL   29       0     Boot from JTAG - keep this bit low
+        PLL_CTRL
+------- ----------- -------- ----- ----------------------------------------------
+BYPASS  6: SSCTRL   28       0     Bypass output clock from input clock
+        PLL_CTRL
+------- ----------- -------- ----- ----------------------------------------------
+OD      6: SSCTRL   25:23    2     PLL output divider stage = OD+1
+        PLL_CTRL
+------- ----------- -------- ----- ----------------------------------------------
+F       6: SSCTRL   20:8     99    Multiplier stage of the PLL = (F+1)/2
+        PLL_CTRL
+------- ----------- -------- ----- ----------------------------------------------
+R       6: SSCTRL   5:0      0     PLL input divider stage = R+1
+        PLL_CTRL
+------- ----------- -------- ----- ----------------------------------------------
+SSDIV   7: SSCTRL   15:0     0     System switch clock divider = SSDIV+1.
+        SSWITCH                    The reset value produces 500MHz for a
+        CLK_DIVIDER                500MHz system clock
+------- ----------- -------- ----- ----------------------------------------------
+REFDIV  8: SSCTRL   15:0     4     Reference clock divider = REFDIV+1.
+        SW_REF                     The reset value produces 100MHz for a
+        CLK_DIVIDER                500MHz system clock
+======= =========== ======== ===== ==============================================
+
+
+**IMPORTANT** Writing to the PLL_CTRL register (0x6) may reset the xCORE
+tile. To reset a multi-tile device, make sure that tile 0 is reset last
+after any other tiles.
+
+Settings on an individual tile basis are controlled through
+*Tile Configuration Registers*. From C use the
+*write_tile_config_reg()* and *read_tile_config_reg()* functions defined in
+*xs1.h*.
+The fields that can be set to control the clock in the
+*Tile Configuration Registers* are shown in the table below.
+
+.. tabularcolumns:: lp{5em}rrp{5.5cm}
+
+======= ============ ======== ===== ==============================================
+Field   Register     Bits     Reset Description
+======= ============ ======== ===== ==============================================
+XCDIV   6: PSCTRL    15:0     0     xcore.ai clock divider = XCDIV+1.
+        PROC_CONTROL                The reset value produces 500MHz for a
+                                    500MHz system clock
+======= ============ ======== ===== ==============================================
+
+
+.. _xcore_ai_clock_frequency_pll_example_pll_configurations:
+
+In the following sections we show a few examples of setting the PLL to
+different values.
+
+
+24MHz Oscillator
+++++++++++++++++
+
+For the initial boot, the system clock will be 400MHz with an 80 MHz
+reference clock. To get the xCORE to 500MHz the following are required:
+*R* = 0, *F* = 124, *OD* = 2. Write *0x01007C00* to SSCTRL,
+PLL_CTRL (0x6) register to bring the PLL output up to 500MHz, with code
+similar to the following::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define PLL_VAL_24MHz 0x01007C00
+
+  int main(void) {
+      unsigned oldValue;
+      read_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, oldValue);
+      if (oldValue != PLL_VAL_24MHz) {
+          write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, PLL_VAL_24MHz);
+      }
+      [...]
+  }
+
+
+12MHz Oscillator
+++++++++++++++++
+
+For the initial boot, the system clock will be 200MHz, with a 40 MHz
+reference clock. The following are required: *R* = 0, *F* = 249, *OD*
+= 2. Write *0x0100F700* to *SSCTRL*, *PLL_CTRL (0x6)* register to
+bring the PLL output up to 400MHz, with code similar to the following::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define PLL_VAL_12MHz 0x0100F700
+
+  int main(void) {
+      unsigned oldValue;
+      read_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, oldValue);
+      if (oldValue != PLL_VAL_12MHz) {
+          write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, PLL_VAL_12MHz);
+      }
+      [...]
+  }
+
+
+Fast Reference Clock
+++++++++++++++++++++
+
+There may be situations where you want to increase the reference clock. The
+highest reference clock supported is half the system clock frequency. You
+can achieve this by setting *REFDIV* to *1* using the following code::
+
+  #include <xs1.h>
+  #include <platform.h>
+
+      [...]
+      write_node_config_reg(tile[0], XS1_SSWITCH_REF_CLK_DIVIDER_NUM, 0x01);
+      [...]
+      
+This will adjust all timers and clock-blocks to run at half the system
+frequency. For example, if your system frequency is 600 MHz, then timers
+and ports will now run on a 300MHz clock that can be divided down to
+150MHz, 75MHz and so on.
+
+
+Slow Switch Clock
++++++++++++++++++
+
+For applications where only a single xcore.ai device is used, the SSwitch
+is only used for configuration purposes. Once the system is configured, the
+SSwitch clock can be substantially reduced to save on dynamic power. 1MHz
+is a good option for a low power SSwitch clock because the SSwitch power is
+dominated by the static power at this frequency.
+
+To reduce the SSwitch clock to 1MHz with a system clock of 500MHz, set
+*SSDIV* to *499* using the following code::
+
+  #include <xs1.h>
+  #include <platform.h>
+
+      [...]
+      write_node_config_reg(tile[0], XS1_SSWITCH_CLK_DIVIDER_NUM, 499);
+      [...]
+
+
+xCORE Tile Clock 200MHz
++++++++++++++++++++++++
+
+If your application does not need to run the xCORE tile at full speed to
+work, dynamic power can be saved by running the tile at a slower rate and
+activating the local divider.
+
+To run a tile at 250MHz from a system frequency of 500MHz, set *XCDIV* to
+*1* and active the local divider by writing *0x10* to *XCORE_CTRL0*::
+
+  #include <xs1.h>
+  #include <platform.h>
+
+      [...]
+      write_tile_config_reg(tile[0], XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 1);
+      setps(XS1_PS_XCORE_CTRL0,0x10);
+      [...]
+
+Note that without the SETPS the divider value will be ignored.
+
+Low power configurations
+++++++++++++++++++++++++
+
+For low power configurations, the PLLs need to be switched to a very low
+frequency. In order to keep a system clock running, one needs to first set
+the system PLL into a bypass mode, feeding the XIN clock directly into the
+system clock. After that, the System PLL can be set to have a very low *F*
+value and it will enter a low power mode.
+
+The code to perform this is as follows::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define PLL_VAL_BYPASS   0xE0000000
+
+          [... high performance mode ...]
+      unsigned pllCtrlVal;
+      setps(XS1_PS_XCORE_CTRL0,0x10);
+      read_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, pllCtrlVal);
+      write_tile_config_reg(tile[0], XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 5);
+      write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM,
+                            pllCtrlVal          | PLL_VAL_BYPASS);
+      write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM,
+                            pllCtrlVal & ~0xFFF | PLL_VAL_BYPASS);
+          [... low power mode ...]
+      write_tile_config_reg(tile[0], XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 0);
+      write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM,
+                            pllCtrlVal | PLL_VAL_BYPASS);
+      write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM,
+                            pllCtrlVal                  );
+          [... high performance mode ...]
+
+This will reduce the power consumption on the PLL_AVDD pin to a negligible
+value, and the dominant power will be leakage and any dynamic power used.
+This mode enables the device to comply with USB suspend.
+
+More details on low-power operation are in the application note on power
+estimation, `xcore.ai Power Consumption Estimation <http://www.xmos.com/?s=XM-014234-AN>`_.
+
+Configuring the Secondary PLL
+-----------------------------
+
+The secondary PLL is a PLL with an PLL with an optional software controlled
+fractional divider. The clock output can be divided down to as low as 171
+Hz. It can be used for generating clocks inside the device, or to create an
+*application clock* out of the device. When the secondary PLL is enabled,
+the output is routed to pin X1D11 and port 1D on core 1 as is shown
+in the figure below. This makes the secondary PLL visible on a pin on the
+outside, and on tile~1 on port 1D. When enabled, tile 1 can input the clock
+on port 1D. If the clock is required on other tiles, then the clock should
+be routed to one-bit ports on those tiles over the PCB.
+
+.. _xcore_ai_clock_frequency_control_external_application_clock:
+
+.. figure:: images/XS3-PLL-app.*
+
+   Using the secondary PLL as an application clock.
+
+The setup of the secondary PLL is almost identical to the setup of the
+primary PLL. The main differences are:
+
+* the output divider always has an extra divide by 2 included, to guarantee
+  a 50/50 duty cycle.
+
+* You must enable the secondary PLL before it can be configured.
+
+The tools can set up the secondary PLL as discussed before, but the
+fractional control has to be enabled manually.
+
+Setting up the Secondary PLL manually
++++++++++++++++++++++++++++++++++++++
+
+The secondary PLL is set-up in a similar manner to the System PLL, using
+register 15 rather than register 6. The differences are:
+
+* You must enable the secondary PLL by clearing bit 27 before you can
+  write to the *F* and *R* parts of the secondary PLL.
+
+* The *nreset* bit has no meaning, but similar to setting up the System PLL,
+  if the frequency is changed a large amount, you will need to wait for the
+  PLL to lock before using the output.
+
+The output frequency of the secondary PLL is the input frequency divided by
+*(R+1)* and *(OD+1)* and multiplied by *(F+1)/2*. *OD*, *F* and *R* must be chosen
+so that *R* is less than 64, *F* is less than 8192, and *OD* is less than 8.
+Also, the VCO frequency should be between 360 and 1800 MHz.
+
+A flag allows the user to choose between two input frequencies: you can
+either use the clock input to the chip as the input to the secondary PLL,
+or the output of the primary PLL. This enables a large slew of
+frequencies to be created.
+
+For example, we can set *R* and *OD* to 4 (dividing by 25), and *F* to 60
+(multiply by 61/2) by writing the following code::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define PLL_VAL 0x02003C04
+  
+      [...]
+      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
+      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL);
+      [...]
+
+On a 24 MHz clock, this will give a 24/25*61 = 29.28 MHz output clock.
+
+Using the fractional divider
+++++++++++++++++++++++++++++
+
+The secondary PLL has an optional fractional divider, register
+SSWITCH_APP_PLL_FRAC_N_DIVIDER}. When enabled, the fractional
+divider will count a period of input clocks, and over part of this period
+it will cause the secondary PLL to use a divider *F+1* rather than *F*.
+
+The period *p* and fraction *f* are set through the control register for the
+fractional divider, and will result in an output frequency that is
+multiplied by *(F+1+f/p)/2* rather than *(F+1)/2*. *f* must be less
+than *p* at all times.
+
+For example, lets suppose we use a crystal of 20 MHz, and we want to create
+an output frequency of 24.576 MHz. That needs a multiplier of 768 (3 *
+2^8), and a divider of 625. We cannot achieve a division by 625 given the
+limitations of the PLL.
+
+So instead, we can create a division of 25, and multiply by 30.72. That is,
+we set both *R* and *OD* to 4, as *(4+1)*(4+1) = 25*, and then need to set
+*F* as follows: *(F+1+f/p)/2 = 30.72*, hence *F+1+f/p = 61.44*, hence *F=60*,
+*f=44* and *p=100*. Although this will work, we can improve this
+further as large values of *p* lead to a lot of jitter. We can divide the
+common factor of four out in both *p* and *f*, and use *f=11*, *p=25*.
+
+This is written to the registers with the following code::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define PLL_VAL 0x02003C04
+  #define PLL_FRACT_VAL 0x80000B19
+  
+      [...]
+      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
+      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL);
+      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL);
+      [...]
+
+
+Fractional control will create jitter - the smaller the value of *p*, the
+less jitter there will be. So another solution with the same constraints
+would be: to divide by 20, and multiply by 38.4. That is, 
+*(F+1+f/p)/2 = 38.4*, hence *F+1+f/p = 76.8*, hence *F=75*,
+*f=4* and *p=5*::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define PLL_VAL 0x02004B03
+  #define PLL_FRACT_VAL 0x80000405
+  
+      [...]
+      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
+      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL);
+      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL);
+      [...]
+
+Using the Secondary PLL for a PHY
+++++++++++++++++++++++++++++++++++
+
+One use of the secondary PLL is to create a clock for one of the PHYs or
+controllers on the chip. Both
+the MIPI PHY and the LPDDR controller can be clocked from the secondary PLL. This
+enables you to run the external memory interface at a high speed (eg, 166
+MHz), whilst running the core at a lower speed (say, 150 MHz).
+
+To use the secondary PLL as an LPDDR clock with a divide of 4 use the following code::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define DDR_CLK_VAL 0x80000001
+  
+      [...]
+      write_node_config_reg(tile[0], XS1_SSWITCH_DDR_CLK_DIVIDER, DDR_CLK_VAL);
+      [...]
+
+To use the secondary PLL as a MIPI clock with a divide of 2 use the following code::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define MIPI_CLK_VAL 0x80000000
+  
+      [...]
+      write_node_config_reg(tile[0], XS1_SSWITCH_MIPI_CLK_DIVIDER, MIPI_CLK_VAL);
+      [...]
+
+
+Using the Secondary PLL as an Application Clock
++++++++++++++++++++++++++++++++++++++++++++++++
+
+One use of the secondary PLL is to create a clock for an external device,
+for example a CODEC or a microphone. To use the secondary PLL as an
+application clock with a divide of 4 use the following code::
+
+  #include <xs1.h>
+  #include <platform.h>
+  #define APP_CLK_VAL 0x80000003
+  
+      [...]
+      write_node_config_reg(tile[0], XS1_APP_CLK_DIVIDER, APP_CLK_VAL);
+      [...]
+
+
+Note that setting the top bit selects the application clock to be derived
+from the secondary PLL (otherwise the primary PLL will be divided), and
+that clearing bit 16 will enable the application clock divider, and also
+change the function of pin X1D11.
+
+Normally pin X1D11 is connected to port 1D on core 1, but when the
+application clock divider is configured as shown above, the application
+clock will be driven on this pin, and on port 1D of core 1. By connecting
+port 1D on core 1 to a clock block on tile 1, one can use that clock block
+as a clock source for other ports, and that clock is also available to
+external devices.
+
+Further information
+-------------------
+
+
+* `The XS3 architecture manual <https://www.xmos.com/?s=XM-0140007-PC>`_
+
+* `XU316-1024-QF60A datasheet <https://www.xmos.com/?s=XM-014034-PC>`_
+
+* `XU316-1024-QF60B datasheet <https://www.xmos.com/?s=XM-014429-PC>`_
+
+* `XU316-1024-TQ128 datasheet <https://www.xmos.com/?s=XM-014532-PC>`_
+
+* `XU316-1024-FB265 datasheet <https://www.xmos.com/?s=XM-014035-PC>`_
+
+* `xcore.ai Power Consumption Estimation <http://www.xmos.com/?s=XM-014234-AN>`_
+
+
+|newpage|
+
+.. _xcore_ai_clock_frequency_control_document_history:
+
+Document History
+----------------
+
++------------------+-------------+-------------------------------------------+
+| **Date**         | **Release** | **Comment**                               |
++==================+=============+===========================================+
+| 2020-09-01       | 1.0         | First release                             |
++------------------+-------------+-------------------------------------------+
+
