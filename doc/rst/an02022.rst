@@ -22,7 +22,7 @@ driven either from the same external clock source, or from the System PLL.
 
 .. _xcore_ai_clock_frequency_control_clock_dividers:
 
-.. figure:: images/meta-drawing-clock-tree.*
+.. figure:: ../images/meta-drawing-clock-tree.*
    :scale: 75%
 
    PLL and Clock Dividers
@@ -474,7 +474,7 @@ be routed to one-bit ports on those tiles over the PCB.
 
 .. _xcore_ai_clock_frequency_control_external_application_clock:
 
-.. figure:: images/XS3-PLL-app.*
+.. figure:: ../images/XS3-PLL-app.*
 
    Using the secondary PLL as an application clock.
 

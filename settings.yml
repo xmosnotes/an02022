@@ -10,7 +10,7 @@ documentation:
   root_doc: doc/rst/an02022.rst
   cognidox_part_number: XM-014200-AN
   pdfs:
-    doc/rst/an02021.rst:
+    doc/rst/an02022.rst:
       pdf_title: '{{title}}'
       pdf_filename: '{{an_number}}'
     README.rst:
