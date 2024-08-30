@@ -87,37 +87,37 @@ device with XFLASH, the code to reprogram the PLL to the desired system and
 reference frequencies will be added automatically into the boot sequence.
 When run with XRUN or XGDB the PLL is automatically reprogrammed via JTAG.
 
-.. table:: XN File Frequency Control Attributes
+.. tabularcolumns:: p{8em}p{4em}p{6.8cm}
 
-   ================== ======= =================================================
-   Attribute          Default Description
-   ================== ======= =================================================
-   Oscillator         none    Input frequency on the XIN pin. If this
-                              attribute is specified, the system frequency
-                              and the reference frequency are programmed using 
-                              their specified (or default) values. If this
-                              attribute is not specified, the boot
-                              configuration
-                              for the system and reference frequencies are used
-                              for the application.
-   ------------------ ------- -------------------------------------------------
-   SystemFrequency    500 Mhz The desired system frequency. The
-                              *Oscillator* attribute must be specified
-                              if this attribute is specified.
-   ------------------ ------- -------------------------------------------------
-   ReferenceFrequency 100 Mhz The desired reference frequency. The
-                              *Oscillator* attribute must be specified
-                              if this attribute is specified.
-   ------------------ ------- -------------------------------------------------
-   SecondaryFrequency none    If present, will cause SecondaryPLL to be
-                              configured by the tools. It will
-                              not configure the fractional divider. The
-                              tools will choose the closest frequency
-                              possible without using the fractional
-                              divider. The
-                              *Oscillator* attribute must be specified
-                              if this attribute is specified.
-   ================== ======= =================================================
+================== ======= =================================================
+Attribute          Default Description
+================== ======= =================================================
+Oscillator         none    Input frequency on the XIN pin. If this
+                           attribute is specified, the system frequency
+                           and the reference frequency are programmed using 
+                           their specified (or default) values. If this
+                           attribute is not specified, the boot
+                           configuration
+                           for the system and reference frequencies are used
+                           for the application.
+------------------ ------- -------------------------------------------------
+SystemFrequency    500 Mhz The desired system frequency. The
+                           *Oscillator* attribute must be specified
+                           if this attribute is specified.
+------------------ ------- -------------------------------------------------
+ReferenceFrequency 100 Mhz The desired reference frequency. The
+                           *Oscillator* attribute must be specified
+                           if this attribute is specified.
+------------------ ------- -------------------------------------------------
+SecondaryFrequency none    If present, will cause SecondaryPLL to be
+                           configured by the tools. It will
+                           not configure the fractional divider. The
+                           tools will choose the closest frequency
+                           possible without using the fractional
+                           divider. The
+                           *Oscillator* attribute must be specified
+                           if this attribute is specified.
+================== ======= =================================================
 
 The frequency control attributes should be added to the Node node within
 the XN file. Frequencies should be specified with their unit of MHz, kHz or
@@ -133,36 +133,9 @@ when it occurs, as does XGDB. XRUN only issues the warning if it has been
 run with the ``--verbose`` switch. XGDB issues the warning when the
 ``connect`` command is issued.
 
-An Example XN file using frequency control attributes is the following::
+An Example XN file using frequency control attributes is the following:
 
-  <?xml version="1.0" encoding="UTF-8"?>
-  <Network xmlns="http://www.xmos.com"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
-    <Type>Board</Type>
-    <Name>xcore.ai Explorer Kit</Name>
-  
-    <Declarations>
-      <Declaration>tileref tile[2]</Declaration>
-    </Declarations>
-  
-    <Packages>
-      <Package id="0" Type="XS3-UnA-1024-FB265">
-        <Nodes>
-          <Node Id="0" InPackageId="0" Type="XS3-L16A-1024"
-                SystemFrequency="500MHz"
-                ReferenceFrequency="100MHz"
-                Oscillator="20Mhz">
-            <Tile Number="0" Reference="tile[0]"/>
-            <Tile Number="1" Reference="tile[1]"/>
-          </Node>
-        </Nodes>
-      </Package>
-    </Packages>
-    <JTAGChain>
-      <JTAGDevice NodeId="0"/>
-    </JTAGChain>  
-  </Network>
+.. literalinclude:: ../../app/src/example.xn
 
 Configuration of LPDDR clock frequency
 ++++++++++++++++++++++++++++++++++++++
@@ -247,44 +220,48 @@ From C or XC, use the *write_node_config_reg()* and
 *read_node_config_reg()* functions defined in *xs1.h*.
 
 The fields that can be set in the *Node Configuration Registers* that
-control the clocks are shown in the table below. Register 6
-controls the PLL settings, registers 7 and 8 control the
-dividers for the switch and the reference clock:
+control the clocks are shown in the tables below.
+Node control register 6, XS1_SSWITCH_PLL_CTL_NUM, controls the PLL settings:
 
-.. tabularcolumns:: lp{5em}rrp{5.5cm}
+.. tabularcolumns:: lrrp{5.5cm}
                     
-======= =========== ======== ===== ==============================================
-Field   Register    Bits     Reset Description
-======= =========== ======== ===== ==============================================
-NRESET  6: SSCTRL   31       0     Do not reset on write
-        PLL_CTRL
-------- ----------- -------- ----- ----------------------------------------------
-NLOCK   6: SSCTRL   30       0     Do not wait for PLL to be locked
-        PLL_CTRL
-------- ----------- -------- ----- ----------------------------------------------
-JTAG    6: SSCTRL   29       0     Boot from JTAG - keep this bit low
-        PLL_CTRL
-------- ----------- -------- ----- ----------------------------------------------
-BYPASS  6: SSCTRL   28       0     Bypass output clock from input clock
-        PLL_CTRL
-------- ----------- -------- ----- ----------------------------------------------
-OD      6: SSCTRL   25:23    2     PLL output divider stage = OD+1
-        PLL_CTRL
-------- ----------- -------- ----- ----------------------------------------------
-F       6: SSCTRL   20:8     99    Multiplier stage of the PLL = (F+1)/2
-        PLL_CTRL
-------- ----------- -------- ----- ----------------------------------------------
-R       6: SSCTRL   5:0      0     PLL input divider stage = R+1
-        PLL_CTRL
-------- ----------- -------- ----- ----------------------------------------------
-SSDIV   7: SSCTRL   15:0     0     System switch clock divider = SSDIV+1.
-        SSWITCH                    The reset value produces 500MHz for a
-        CLK_DIVIDER                500MHz system clock
-------- ----------- -------- ----- ----------------------------------------------
-REFDIV  8: SSCTRL   15:0     4     Reference clock divider = REFDIV+1.
-        SW_REF                     The reset value produces 100MHz for a
-        CLK_DIVIDER                500MHz system clock
-======= =========== ======== ===== ==============================================
+======= ======== ===== ==============================================
+Field   Bits     Reset Description
+======= ======== ===== ==============================================
+NRESET  31       0     Do not reset on write
+NLOCK   30       0     Do not wait for PLL to be locked
+JTAG    29       0     Boot from JTAG - keep this bit low
+BYPASS  28       0     Bypass output clock from input clock
+OD      25:23    2     PLL output divider stage = OD+1
+F       20:8     99    Multiplier stage of the PLL = (F+1)/2
+R       5:0      0     PLL input divider stage = R+1
+======= ======== ===== ==============================================
+
+Node control register 7, XS1_SSWITCH_CLK_DIVIDER_NUM, controls the divider for the
+xCONNECT switch:
+
+.. tabularcolumns:: lrrp{5.5cm}
+        
+======= ======== ===== ==============================================
+Field   Bits     Reset Description
+======= ======== ===== ==============================================
+SSDIV   15:0     0     System switch clock divider = SSDIV+1.
+                       The reset value produces 500MHz for a
+                       500MHz system clock
+======= ======== ===== ==============================================
+
+Node control register 8, XS1_SSWITCH_REF_CLK_DIVIDER_NUM, controls the divider for the
+reference clock:
+
+.. tabularcolumns:: lrrp{5.5cm}
+        
+======= ======== ===== ==============================================
+Field   Bits     Reset Description
+======= ======== ===== ==============================================
+REFDIV  15:0     4     Reference clock divider = REFDIV+1.
+                       The reset value produces 100MHz for a
+                       500MHz system clock
+======= ======== ===== ==============================================
 
 
 **IMPORTANT** Writing to the PLL_CTRL register (0x6) may reset the xCORE
@@ -295,18 +272,19 @@ Settings on an individual tile basis are controlled through
 *Tile Configuration Registers*. From C use the
 *write_tile_config_reg()* and *read_tile_config_reg()* functions defined in
 *xs1.h*.
-The fields that can be set to control the clock in the
-*Tile Configuration Registers* are shown in the table below.
+The field that can be set to control the clock in the
+*Tile Configuration Registers* is shown in the table below.
+Tile control regiser 6, XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, controls the divider for the tile:
 
-.. tabularcolumns:: lp{5em}rrp{5.5cm}
+.. tabularcolumns:: lrrp{5.5cm}
 
-======= ============ ======== ===== ==============================================
-Field   Register     Bits     Reset Description
-======= ============ ======== ===== ==============================================
-XCDIV   6: PSCTRL    15:0     0     xcore.ai clock divider = XCDIV+1.
-        PROC_CONTROL                The reset value produces 500MHz for a
-                                    500MHz system clock
-======= ============ ======== ===== ==============================================
+======= ======== ===== ==============================================
+Field   Bits     Reset Description
+======= ======== ===== ==============================================
+XCDIV   15:0     0     xcore.ai clock divider = XCDIV+1.
+                       The reset value produces 500MHz for a
+                       500MHz system clock
+======= ======== ===== ==============================================
 
 
 .. _xcore_ai_clock_frequency_pll_example_pll_configurations:
@@ -322,20 +300,11 @@ For the initial boot, the system clock will be 400MHz with an 80 MHz
 reference clock. To get the xCORE to 500MHz the following are required:
 *R* = 0, *F* = 124, *OD* = 2. Write *0x01007C00* to SSCTRL,
 PLL_CTRL (0x6) register to bring the PLL output up to 500MHz, with code
-similar to the following::
+similar to the following:
 
-  #include <xs1.h>
-  #include <platform.h>
-  #define PLL_VAL_24MHz 0x01007C00
-
-  int main(void) {
-      unsigned oldValue;
-      read_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, oldValue);
-      if (oldValue != PLL_VAL_24MHz) {
-          write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, PLL_VAL_24MHz);
-      }
-      [...]
-  }
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // Flip system clock to new value 24 on reset start
+  :end-before: // Flip system clock to new value 24 on reset end
 
 
 12MHz Oscillator
@@ -344,20 +313,11 @@ similar to the following::
 For the initial boot, the system clock will be 200MHz, with a 40 MHz
 reference clock. The following are required: *R* = 0, *F* = 249, *OD*
 = 2. Write *0x0100F700* to *SSCTRL*, *PLL_CTRL (0x6)* register to
-bring the PLL output up to 400MHz, with code similar to the following::
+bring the PLL output up to 400MHz, with code similar to the following:
 
-  #include <xs1.h>
-  #include <platform.h>
-  #define PLL_VAL_12MHz 0x0100F700
-
-  int main(void) {
-      unsigned oldValue;
-      read_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, oldValue);
-      if (oldValue != PLL_VAL_12MHz) {
-          write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, PLL_VAL_12MHz);
-      }
-      [...]
-  }
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // Flip system clock to new value 12 on reset start
+  :end-before: // Flip system clock to new value 12 on reset end
 
 
 Fast Reference Clock
@@ -365,15 +325,12 @@ Fast Reference Clock
 
 There may be situations where you want to increase the reference clock. The
 highest reference clock supported is half the system clock frequency. You
-can achieve this by setting *REFDIV* to *1* using the following code::
+can achieve this by setting *REFDIV* to *1* using the following code:
 
-  #include <xs1.h>
-  #include <platform.h>
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // Ref clock max speed start
+  :end-before: // Ref clock max speed end
 
-      [...]
-      write_node_config_reg(tile[0], XS1_SSWITCH_REF_CLK_DIVIDER_NUM, 0x01);
-      [...]
-      
 This will adjust all timers and clock-blocks to run at half the system
 frequency. For example, if your system frequency is 600 MHz, then timers
 and ports will now run on a 300MHz clock that can be divided down to
@@ -390,14 +347,11 @@ is a good option for a low power SSwitch clock because the SSwitch power is
 dominated by the static power at this frequency.
 
 To reduce the SSwitch clock to 1MHz with a system clock of 500MHz, set
-*SSDIV* to *499* using the following code::
+*SSDIV* to *499* using the following code:
 
-  #include <xs1.h>
-  #include <platform.h>
-
-      [...]
-      write_node_config_reg(tile[0], XS1_SSWITCH_CLK_DIVIDER_NUM, 499);
-      [...]
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // Switch clock low speed start
+  :end-before: // Switch clock low speed end
 
 
 xCORE Tile Clock 200MHz
@@ -407,16 +361,13 @@ If your application does not need to run the xCORE tile at full speed to
 work, dynamic power can be saved by running the tile at a slower rate and
 activating the local divider.
 
-To run a tile at 250MHz from a system frequency of 500MHz, set *XCDIV* to
-*1* and active the local divider by writing *0x10* to *XCORE_CTRL0*::
+For example, if you wish to run a tile at 250MHz
+from a system frequency of 500MHz, set *XCDIV* to
+*1* and active the local divider by writing *0x10* to *XCORE_CTRL0*:
 
-  #include <xs1.h>
-  #include <platform.h>
-
-      [...]
-      write_tile_config_reg(tile[0], XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 1);
-      setps(XS1_PS_XCORE_CTRL0,0x10);
-      [...]
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // Tile clock half speed start
+  :end-before: // Tile clock half speed end
 
 Note that without the SETPS the divider value will be ignored.
 
@@ -428,29 +379,11 @@ frequency. In order to keep a system clock running, one needs to first set
 the system PLL into a bypass mode, feeding the XIN clock directly into the
 system clock. After that, the System PLL can be set to have a very low *F*
 value and it will enter a low power mode.
+The code to perform this is shown in two functions below:
 
-The code to perform this is as follows::
-
-  #include <xs1.h>
-  #include <platform.h>
-  #define PLL_VAL_BYPASS   0xE0000000
-
-          [... high performance mode ...]
-      unsigned pllCtrlVal;
-      setps(XS1_PS_XCORE_CTRL0,0x10);
-      read_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM, pllCtrlVal);
-      write_tile_config_reg(tile[0], XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 5);
-      write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM,
-                            pllCtrlVal          | PLL_VAL_BYPASS);
-      write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM,
-                            pllCtrlVal & ~0xFFF | PLL_VAL_BYPASS);
-          [... low power mode ...]
-      write_tile_config_reg(tile[0], XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 0);
-      write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM,
-                            pllCtrlVal | PLL_VAL_BYPASS);
-      write_node_config_reg(tile[0], XS1_SSWITCH_PLL_CTL_NUM,
-                            pllCtrlVal                  );
-          [... high performance mode ...]
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // PLL bypass start
+  :end-before: // PLL bypass end
 
 This will reduce the power consumption on the PLL_AVDD pin to a negligible
 value, and the dominant power will be leakage and any dynamic power used.
@@ -466,6 +399,7 @@ The secondary PLL is a PLL with an PLL with an optional software controlled
 fractional divider. The clock output can be divided down to as low as 171
 Hz. It can be used for generating clocks inside the device, or to create an
 *application clock* out of the device. When the secondary PLL is enabled,
+and the divider is enabled,
 the output is routed to pin X1D11 and port 1D on core 1 as is shown
 in the figure below. This makes the secondary PLL visible on a pin on the
 outside, and on tile~1 on port 1D. When enabled, tile 1 can input the clock
@@ -513,16 +447,11 @@ or the output of the primary PLL. This enables a large slew of
 frequencies to be created.
 
 For example, we can set *R* and *OD* to 4 (dividing by 25), and *F* to 60
-(multiply by 61/2) by writing the following code::
+(multiply by 61/2) by writing the following code:
 
-  #include <xs1.h>
-  #include <platform.h>
-  #define PLL_VAL 0x02003C04
-  
-      [...]
-      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
-      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL);
-      [...]
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // APP PLL 29.28 start
+  :end-before: // APP PLL 29.28 end
 
 On a 24 MHz clock, this will give a 24/25*61 = 29.28 MHz output clock.
 
@@ -551,36 +480,21 @@ we set both *R* and *OD* to 4, as *(4+1)*(4+1) = 25*, and then need to set
 further as large values of *p* lead to a lot of jitter. We can divide the
 common factor of four out in both *p* and *f*, and use *f=11*, *p=25*.
 
-This is written to the registers with the following code::
+This is written to the registers with the following code:
 
-  #include <xs1.h>
-  #include <platform.h>
-  #define PLL_VAL 0x02003C04
-  #define PLL_FRACT_VAL 0x80000B19
-  
-      [...]
-      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
-      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL);
-      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL);
-      [...]
-
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // FRAC divider 11 25 start
+  :end-before: // FRAC divider 11 25 end
 
 Fractional control will create jitter - the smaller the value of *p*, the
 less jitter there will be. So another solution with the same constraints
 would be: to divide by 20, and multiply by 38.4. That is, 
 *(F+1+f/p)/2 = 38.4*, hence *F+1+f/p = 76.8*, hence *F=75*,
-*f=4* and *p=5*::
+*f=4* and *p=5*:
 
-  #include <xs1.h>
-  #include <platform.h>
-  #define PLL_VAL 0x02004B03
-  #define PLL_FRACT_VAL 0x80000405
-  
-      [...]
-      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
-      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL);
-      write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL);
-      [...]
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // FRAC divider 20 38.4 start
+  :end-before: // FRAC divider 20 38.4 end
 
 Using the Secondary PLL for a PHY
 ++++++++++++++++++++++++++++++++++
@@ -591,25 +505,17 @@ the MIPI PHY and the LPDDR controller can be clocked from the secondary PLL. Thi
 enables you to run the external memory interface at a high speed (eg, 166
 MHz), whilst running the core at a lower speed (say, 150 MHz).
 
-To use the secondary PLL as an LPDDR clock with a divide of 4 use the following code::
+To use the secondary PLL as an LPDDR clock with a divide of 4 use the following code:
 
-  #include <xs1.h>
-  #include <platform.h>
-  #define DDR_CLK_VAL 0x80000001
-  
-      [...]
-      write_node_config_reg(tile[0], XS1_SSWITCH_DDR_CLK_DIVIDER, DDR_CLK_VAL);
-      [...]
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // LPDDR clock divider by 4 start
+  :end-before: // LPDDR clock divider by 4 end
 
-To use the secondary PLL as a MIPI clock with a divide of 2 use the following code::
+To use the secondary PLL as a MIPI clock with a divide of 2 use the following code:
 
-  #include <xs1.h>
-  #include <platform.h>
-  #define MIPI_CLK_VAL 0x80000000
-  
-      [...]
-      write_node_config_reg(tile[0], XS1_SSWITCH_MIPI_CLK_DIVIDER, MIPI_CLK_VAL);
-      [...]
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // MIPI clock divider by 2 start
+  :end-before: // MIPI clock divider by 2 end
 
 
 Using the Secondary PLL as an Application Clock
@@ -617,16 +523,11 @@ Using the Secondary PLL as an Application Clock
 
 One use of the secondary PLL is to create a clock for an external device,
 for example a CODEC or a microphone. To use the secondary PLL as an
-application clock with a divide of 4 use the following code::
+application clock with a divide of 4 use the following code:
 
-  #include <xs1.h>
-  #include <platform.h>
-  #define APP_CLK_VAL 0x80000003
-  
-      [...]
-      write_node_config_reg(tile[0], XS1_APP_CLK_DIVIDER, APP_CLK_VAL);
-      [...]
-
+.. literalinclude:: ../../app/src/main.c
+  :start-after: // output divide by 4 start
+  :end-before: // output divide by 4 end
 
 Note that setting the top bit selects the application clock to be derived
 from the secondary PLL (otherwise the primary PLL will be divided), and
@@ -667,6 +568,6 @@ Document History
 +------------------+-------------+-------------------------------------------+
 | **Date**         | **Release** | **Comment**                               |
 +==================+=============+===========================================+
-| 2020-09-01       | 1.0         | First release                             |
+| 2024-09-01       | 1.0         | First release                             |
 +------------------+-------------+-------------------------------------------+
 

@@ -1,4 +1,4 @@
 **/.DS_Store
 doc/_build
-app_an02021/bin
-app_an02021/build
+app/bin
+app/build
