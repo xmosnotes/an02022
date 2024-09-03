@@ -31,7 +31,9 @@ The System PLL has fixed initial settings. They allow an 8-30MHz external clock 
 be used and operate the xCORE tiles at 133-500MHz respectively. Typically, however,
 the PLL is reprogrammed on boot in order to set the PLL to the desired
 output frequency. The XMOS tools can be used to reprogram the PLL
-automatically by specifying the application's static clock configuration in the *XN file*.
+automatically by specifying the application's static clock configuration in
+a configuration file called the *XN file* that allows the designer to
+specify the components immediately around the xCORE processor(s).
 
 Note that throughout this document we assume that a clock is supplied on
 the XIN pin. Instead of supplying a clock directly on XIN, one can instead
@@ -49,7 +51,8 @@ values too:
 
 * The input clock on XIN must be between 8 and 30 MHz
 
-  If you use a crystal, use a 24 or 25 MHz crystal depending on your application.
+  If you use a crystal, we suggest you use a 24 or 25 MHz crystal as they
+  are readily available, and are supported by the USB PHY.
 
 * VCO frequency must be between 360 and 1800 MHz.
 
@@ -82,7 +85,7 @@ Static configuration of the PLLs through the XN File
 For the vast majority of applications, you can use the tools to set up the
 PLLs. The application's
 input oscillator frequency, system frequency, reference frequency and secondary frequency can be
-specified in the XN file. When the application code is written to a flash
+specified in the XN file as shown in the table below. When the application code is written to a flash
 device with XFLASH, the code to reprogram the PLL to the desired system and
 reference frequencies will be added automatically into the boot sequence.
 When run with XRUN or XGDB the PLL is automatically reprogrammed via JTAG.
@@ -122,7 +125,7 @@ SecondaryFrequency none    If present, will cause SecondaryPLL to be
 The frequency control attributes should be added to the Node node within
 the XN file. Frequencies should be specified with their unit of MHz, kHz or
 Hz, (for example 500MHz, 24576kHz or 6745800Hz). If the frequency control
-attributes are not specified in the XN file, then the xTIMEcomposer tools
+attributes are not specified in the XN file, then the XTC tools
 will not modify the frequency control registers.
 
 If the target frequency specified in the XN file for the system, reference or secondary
@@ -144,9 +147,9 @@ If an LPDDR memory is used, then its clock frequency can be configured by adding
 Frequency attribute to the *ExtMem* external memory specification. The tools automatically
 decide how to set the LPDDR divider and its mux to achieve the desired frequency:
 
-  * If the SystemPLL (nor the SecondaryPLL if supplied) cannot be used to
+  * If neither the SystemPLL (nor the SecondaryPLL if supplied) can be used to
     perfectly achieve the desired ExtMem Frequency, a warning and advice
-    message will be raised
+    message will be raised and an approximate frequency will be used.
 
   * If the ExtMem Frequency can be perfectly achieved from either the
     SystemPLL or the SecondaryPLL, the SystemPLL will be chosen. This
@@ -173,11 +176,15 @@ The initial System PLL settings used after reset are:
 This results in a multiplier of *50/3 = 16.667*. The minimum clock
 frequency allowed on the XIN pin is 8 MHz, which multiplies up to a 133 MHz
 clock. The maximum clock frequency allowed on XIN is 30 MHz, which
-multiplies up to a system clock of 500 MHz.
+multiplies up to a system clock of 500 MHz. This is a safe frequency for
+booting, typically the application program would override the settings and
+run the device at, for example, 600 or 800 Mhz.
 
-If a different PLL configuration is required, and you want to configure the
-PLL manually, then the new settings should be
-written to the PLL_CTRL register. The PLL_CTRL register has two bits that
+If a different PLL configuration is required, and *you want to configure the
+PLL manually*, then the new settings should be
+written to the PLL_CTRL register. (Please note that you can ignore the rest
+of this subsection if you specify the clock through an XN file.)
+The PLL_CTRL register has two bits that
 control how the new values are applied: an *nreset* bit and an *nlock* bit,
 at bit numbers XS1_SS_PLL_CTL_NRESET_SHIFT (31) and
 XS1_SS_PLL_CTL_NLOCK_SHIFT (30). Both bits are active low:
@@ -194,11 +201,11 @@ XS1_SS_PLL_CTL_NLOCK_SHIFT (30). Both bits are active low:
 * If the *nreset* bit is set high and the *nlock* bit is set low, then the
   PLL clock will be suspended whilst the PLL adapts to the new settings.
   During this time, the chip will not have a clock, and it will be inactive
-  for a short period of time (a few microseconds).
+  for a short period of time (50 input clocks; typically a few microseconds).
 
 * If both *nreset* and *nlock* bits are high, then the PLL will adapt whilst
   the chip is running. This means that the clock will be imprecise for a
-  short period of time (a few microseconds).
+  short period of time.
 
 The last mode shall only be used if a small change is made to *F*; any change
 of more than 5% requires at least one of the *nlock* or *nreset* bits to be cleared.
@@ -299,7 +306,7 @@ different values.
 For the initial boot, the system clock will be 400MHz with an 80 MHz
 reference clock. To get the xCORE to 500MHz the following are required:
 *R* = 0, *F* = 124, *OD* = 2. Write *0x01007C00* to SSCTRL,
-PLL_CTRL (0x6) register to bring the PLL output up to 500MHz, with code
+PLL_CTRL (0x6) register to bring the PLL output up to, for example, 500MHz, with code
 similar to the following:
 
 .. literalinclude:: ../../app/src/main.c
@@ -545,7 +552,7 @@ Further information
 -------------------
 
 
-* `The XS3 architecture manual <https://www.xmos.com/?s=XM-0140007-PC>`_
+* `The XS3 architecture manual <https://www.xmos.com/?s=XM-014007-PS>`_
 
 * `XU316-1024-QF60A datasheet <https://www.xmos.com/?s=XM-014034-PC>`_
 
