@@ -528,6 +528,8 @@ To use the secondary PLL as a MIPI clock with a divide of 2 use the following co
   :start-after: // MIPI clock divider by 2 start
   :end-before: // MIPI clock divider by 2 end
 
+If the secondary PLL is used to generate a specific clock for one of these PHYs, 
+the other PHY (if used) will need to be clocked using the core clock.
 
 Using the Secondary PLL as an Application Clock
 +++++++++++++++++++++++++++++++++++++++++++++++
