@@ -405,7 +405,11 @@ Configuring the Secondary PLL
 The secondary PLL is a PLL with an PLL with an optional software controlled
 fractional divider. The clock output can be divided down to as low as 171
 Hz. It can be used for generating clocks inside the device, or to create an
-*application clock* out of the device. When the secondary PLL is enabled,
+*application clock* out of the device. The Secondary PLL allows for one extra
+frequency to be created. Hence, the secondary PLL can be used for any one
+of the examples below.
+
+When the secondary PLL is enabled,
 and the divider is enabled,
 the output is routed to pin X1D11 and port 1D on core 1 as is shown
 in the figure below. This makes the secondary PLL visible on a pin on the
@@ -524,6 +528,8 @@ To use the secondary PLL as a MIPI clock with a divide of 2 use the following co
   :start-after: // MIPI clock divider by 2 start
   :end-before: // MIPI clock divider by 2 end
 
+If the secondary PLL is used to generate a specific clock for one of these PHYs, 
+the other PHY (if used) will need to be clocked using the core clock.
 
 Using the Secondary PLL as an Application Clock
 +++++++++++++++++++++++++++++++++++++++++++++++
