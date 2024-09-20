@@ -7,20 +7,22 @@ AN02022: xcore.ai Clock Frequency Control
 :vendor: XMOS
 :version: 1.0.0
 :scope: Example
-:description: This note describes how to control the PLLs on xcore.ai
+:description: How to control xcore.ai PLL's
 :category: Core
-:keywords: PLL
+:keywords: PLL, clocking, MIPI, power, LPDDR
 :hardware: XK-EVK-XU316
 
 Overview
 ********
 
-This note describes how to control the PLLs on `xcore.ai` devices.
+This note describes the PLLs in `xcore.ai` devices and how to control them.
 
 Key Features
 ************
 
-  * Example applicattion demonstrating various the various concepts documented
+  * Documentation of System and Secondary ('Application') PLLs
+  * Documentation of clocking LPDDR/MIPI
+  * Example application demonstrating the various concepts documented
 
 Known Issues
 ************
