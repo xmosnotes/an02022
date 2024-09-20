@@ -1,7 +1,8 @@
 :orphan:
 
-AN02023: Frequency Control on xcore.ai
-######################################
+#########################################
+AN02022: xcore.ai Clock Frequency Control
+#########################################
 
 :vendor: XMOS
 :version: 1.0.0
@@ -14,12 +15,12 @@ AN02023: Frequency Control on xcore.ai
 Overview
 ********
 
-This note describes how to control the PLLs on xcore.ai.
+This note describes how to control the PLLs on `xcore.ai` devices.
 
 Key Features
 ************
 
-  * PLL control
+  * Example applicattion demonstrating various the various concepts documented
 
 Known Issues
 ************
@@ -34,12 +35,12 @@ Required Tools
 Required Libraries (Dependencies)
 *********************************
 
-None
+  * None
 
 Related Notes
 *************
 
-None
+  * None
 
 Support
 *******

@@ -1,7 +1,7 @@
-AN02003 Change Log
-==================
+AN02003 Changelog
+=================
 
-0.0.1
+1.0.0
 -----
 
-  * Initial release
+  * Initial public release

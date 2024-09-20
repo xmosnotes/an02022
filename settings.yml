@@ -2,19 +2,24 @@
 
 an_number: AN02022
 project: '{{an_number}}'
-title: 'Frequency Control on xcore.ai'
+title: '{{an_number}}: xcore.ai Clock Frequency Control'
 version: 1.0.0
 
 documentation:
   exclude_patterns_path: doc/exclude-patterns.inc
+  linkcheck_ignore_regex: ['.*xmos.com*']
   root_doc: doc/rst/an02022.rst
   cognidox_part_number: XM-014200-AN
   pdfs:
     doc/rst/an02022.rst:
       pdf_title: '{{title}}'
-      pdf_filename: '{{an_number}}'
+      pdf_filename: '{{an_number}}_v{{version}}'
+      pdf_short: yes
     README.rst:
       pdf_title: '{{title}} (README)'
-      pdf_filename: '{{an_number}}_readme'
+      pdf_filename: '{{an_number}}_v{{version}}_readme'
       pdf_short: yes
+
+software:
+  cognidox_part_number: XM-015150-SM
 
