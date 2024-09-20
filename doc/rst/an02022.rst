@@ -9,7 +9,7 @@ AN02022: xcore.ai Clock Frequency Control
 ******************************
 PLL and Clock Divider Overview
 ******************************
-/x
+
 `xcore.ai` devices have two internal phase locked loops (PLLs): the System PLL
 (sometimes known as the Core PLL or Primary PLL) and the Secondary PLL
 (sometimes known as the Application PLL). Both PLLs have the
@@ -37,7 +37,7 @@ automatically by specifying the application's static clock configuration in
 a configuration file called the *XN file* that allows the designer to
 specify the components immediately around the `xcore` processor(s).
 
-.. note:: 
+.. note::
    Throughout this document it is assumed that a clock is supplied on
    the `XIN` pin. Instead of supplying a clock directly on `XIN`, one can instead
    use a crystal on `XIN`/`XOUT`, as specified in the datasheet.
@@ -80,7 +80,7 @@ ratio between the VCO frequency and the input frequency. The output divider
 
   * f :sub:`out` = f :sub:`vco` / (OD + 1)
 
-.. note:: 
+.. note::
 
    The value *1* is added to each of *F*, *R*, and *OD*.
 
@@ -89,7 +89,7 @@ Static configuration of the PLLs through the XN File
 ****************************************************
 
 For the vast majority of applications, the tools can be used to set up the
-PLLs. 
+PLLs.
 The application's input oscillator frequency, system frequency, reference frequency and secondary frequency can be specified in the XN file as shown in table below . When the application code is written to a flash
 device with XFLASH, the code to reprogram the PLL to the desired system and
 reference frequencies will be added automatically into the boot sequence.
@@ -277,7 +277,7 @@ REFDIV  15:0     4     Reference clock divider = REFDIV+1.
 ======= ======== ===== ==============================================
 
 
-.. warning:: 
+.. warning::
 
    Writing to the `PLL_CTRL` register (0x6) may reset the xCORE
    tile. To reset a multi-tile device, make sure that tile 0 is reset last
@@ -388,7 +388,7 @@ Low power configurations
 ========================
 
 For low power configurations, the PLLs need to be switched to a very low
-frequency. In order to keep a system clock running, the system PLL must first 
+frequency. In order to keep a system clock running, the system PLL must first
 be set into a bypass mode, feeding the `XIN` clock directly into the
 system clock. After that, the System PLL can be set to have a very low *F*
 value and it will enter a low power mode.
@@ -409,9 +409,9 @@ estimation, `AN02023: xcore.ai Power Consumption Estimation <http://www.xmos.com
 Configuring the Secondary PLL
 *****************************
 
-The Secondary PLL (or Application PLL) is a PLL with an optional 
-software controlled fractional divider. The clock output can be divided down 
-to as low as 171 Hz. 
+The Secondary PLL (or Application PLL) is a PLL with an optional
+software controlled fractional divider. The clock output can be divided down
+to as low as 171 Hz.
 It can be used for generating clocks inside the device, or to create an
 *application clock* out of the device. The Secondary PLL allows for one extra
 frequency to be created. Hence, the secondary PLL can be used for any one
@@ -460,7 +460,7 @@ The output frequency of the Secondary PLL is the input frequency divided by
 so that *R* is less than 64, *F* is less than 8192, and *OD* is less than 8.
 Also, the VCO frequency should be between 360 and 1800 MHz.
 
-A flag allows the user to choose between two input frequencies: choices are 
+A flag allows the user to choose between two input frequencies: choices are
 either using the clock input to the device as the input to the secondary PLL,
 or the output of the primary PLL. This enables a large slew of
 frequencies to be created.
@@ -495,7 +495,7 @@ limitations of the PLL.
 Instead, a division of 25 can be created, and a multiply by 30.72. That is,
 set both *R* and *OD* to 4, as *(4+1)*(4+1) = 25*, and then setting
 *F* as follows: *(F+1+f/p)/2 = 30.72*, hence *F+1+f/p = 61.44*, hence *F=60*,
-*f=44* and *p=100*. Although this will work, this can be improved further 
+*f=44* and *p=100*. Although this will work, this can be improved further
 as large values of *p* lead to a lot of jitter. The
 common factor of four can be divided out in both *p* and *f*, and use *f=11*, *p=25*.
 
@@ -519,7 +519,7 @@ Using the Secondary PLL for a PHY
 =================================
 
 One use of the Secondary PLL is to create a clock for one of the integrated PHYs or
-controllers in the device. 
+controllers in the device.
 Both the MIPI PHY and the LPDDR controller can be clocked from the Secondary PLL. This
 enables the external memory interface to be run at a high speed (eg, 166
 MHz), whilst running the core at a lower speed (say, 150 MHz).
@@ -550,7 +550,7 @@ application clock with a divide of 4 use the following code:
   :start-after: // output divide by 4 start
   :end-before: // output divide by 4 end
 
-.. note:: 
+.. note::
 
    Setting the top bit selects the application clock to be derived
    from the Secondary PLL (otherwise the primary PLL will be divided), and
