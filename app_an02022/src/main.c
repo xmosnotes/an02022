@@ -78,22 +78,22 @@ void pll_bypass_off(void) {
 // PLL bypass end
 
 void tile_clock_250_MHz() {
-// Tile clock half speed start
+    // Tile clock half speed start
     write_pswitch_reg(get_local_tile_id(), XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 1);
     setps(XS1_PS_XCORE_CTRL0,0x10);
-// Tile clock half speed end
+    // Tile clock half speed end
 }
 
 void switch_clock_low_speed() {
-// Switch clock low speed start
+    // Switch clock low speed start
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_CLK_DIVIDER_NUM, 499);
-// Switch clock low speed end
+    // Switch clock low speed end
 }
 
 void ref_clock_max_speed() {
-// Ref clock max speed start
+    // Ref clock max speed start
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_REF_CLK_DIVIDER_NUM, 0x01);
-// Ref clock max speed end
+    // Ref clock max speed end
 }
 
 void flip_system_clock_once_12() {
