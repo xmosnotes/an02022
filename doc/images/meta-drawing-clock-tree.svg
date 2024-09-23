@@ -9,7 +9,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="meta-drawing-clock-tree.svg"
-   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   inkscape:version="1.0.2 (e86c8708, 2021-01-15)"
    id="svg88097"
    version="1.1"
    viewBox="0 0 269.875 227.54165"
@@ -1281,17 +1281,17 @@
      fit-margin-top="0"
      showguides="true"
      inkscape:window-maximized="0"
-     inkscape:window-y="23"
-     inkscape:window-x="95"
+     inkscape:window-y="25"
+     inkscape:window-x="90"
      inkscape:window-height="779"
      inkscape:window-width="1231"
      inkscape:snap-text-baseline="true"
      showgrid="true"
      inkscape:current-layer="layer10"
      inkscape:document-units="mm"
-     inkscape:cy="364.39984"
-     inkscape:cx="545.08836"
-     inkscape:zoom="0.53439596"
+     inkscape:cy="339.25531"
+     inkscape:cx="480.68976"
+     inkscape:zoom="3.000147"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
@@ -1312,7 +1312,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1620,7 +1620,7 @@
          y="47.492706"
          x="113.77084"
          id="tspan11771"
-         sodipodi:role="line">700 MHz</tspan></text>
+         sodipodi:role="line">800 MHz</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:2.82222px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica Light';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#1399db;fill-opacity:1;stroke:none;stroke-width:0.264583"
