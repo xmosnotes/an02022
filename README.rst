@@ -5,7 +5,7 @@ AN02022: xcore.ai Clock Frequency Control
 #########################################
 
 :vendor: XMOS
-:version: 1.0.0
+:version: 1.1.0
 :scope: Example
 :description: How to control xcore.ai PLL's
 :category: Core

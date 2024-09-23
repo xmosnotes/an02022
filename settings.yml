@@ -3,7 +3,7 @@
 an_number: AN02022
 project: '{{an_number}}'
 title: '{{an_number}}: xcore.ai Clock Frequency Control'
-version: 1.0.0
+version: 1.1.0
 
 documentation:
   exclude_patterns_path: doc/exclude-patterns.inc
