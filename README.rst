@@ -42,7 +42,7 @@ Required Libraries (Dependencies)
 Related Notes
 *************
 
-  * None
+  * AN02023: xcore.ai Power Consumption Estimation
 
 Support
 *******

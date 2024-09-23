@@ -434,10 +434,12 @@ be routed to one-bit ports on those tiles externally.
 The setup of the Secondary PLL is almost identical to the setup of the
 primary PLL. The main differences are:
 
-* the output divider always has an extra divide by 2 included, to guarantee
+* The output divider always has an extra divide by 2 included, to guarantee
   a 50/50 duty cycle.
 
-* You must enable the Secondary PLL before it can be configured.
+* The Secondary PLL must be enabled before it can be configured.
+
+* The Secondary PLL has an an optional software controlled fractional divider.
 
 The XTC tools can set up the Secondary PLL as discussed before, but the
 fractional control has to be enabled manually.
@@ -579,6 +581,10 @@ Further reading
 * `XU316-1024-FB265 datasheet <https://www.xmos.com/?s=XM-014035-PC>`_
 
 * `xcore.ai Power Consumption Estimation <http://www.xmos.com/file/an02023>`_
+
+* `lib_sw_pll <https://www.xmos.com/file/lib_sw_pll>`_: A software library that, using the
+  `xcore.ai` Application PLL, provides a PLL that will generate a clock that is phase-locked to an
+  input clock.
 
 |newpage|
 
