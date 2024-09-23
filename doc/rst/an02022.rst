@@ -535,7 +535,7 @@ would be: to divide by 20, and multiply by 38.4. That is,
   :end-before: // FRAC divider 20 38.4 end
 
 Keeping jitter low
-++++++++++++++++++++++
+++++++++++++++++++
 
 In order to keep jitter low:
 
