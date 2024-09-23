@@ -59,6 +59,10 @@ values too:
 
 * VCO frequency must be between 360 and 1800 MHz.
 
+* The output frequency must be less than 800 MHz
+
+* The comparator frequency must be between 220 kHz and 1800 MHz
+
 * The device has a maximum operating frequency, which is specified in the
   datasheet for the device.
 
@@ -80,9 +84,17 @@ ratio between the VCO frequency and the input frequency. The output divider
 
   * f :sub:`out` = f :sub:`vco` / (OD + 1)
 
-.. note::
+Note that in this document we use *F*, *R*, and *OD* to mean the value that
+is stored in the register that controls the PLL. As such
+the value *1* is added to each of *F*, *R*, and *OD* before they are being
+used as a multiplier or divider. The divide value is the register value
+plus 1.
 
-   The value *1* is added to each of *F*, *R*, and *OD*.
+*R* must be in the range 0..63 (enabling a divider of between 1 and 64
+inclusive), *OD* must be in the range 0..7 (enabling a divider of between 1
+and 8 inclusive), and *F* must be in the range 0..8191 (enabling a divider
+of between 1 and 8192 inclusive)
+
 
 ****************************************************
 Static configuration of the PLLs through the XN File
@@ -127,7 +139,7 @@ SecondaryFrequency none    If present, will cause Secondary PLL to be
                            if this attribute is specified.
 ================== ======= =================================================
 
-The frequency control attributes should be added to the Node node within
+The frequency control attributes should be added to the XML-element ``<Node>`` within
 the XN file. Frequencies should be specified with their unit of MHz, kHz or
 Hz, (for example 500MHz, 24576kHz or 6745800Hz). If the frequency control
 attributes are not specified in the XN file, then the XTC tools
@@ -195,7 +207,8 @@ control how the new values are applied: an *nreset* bit and an *nlock* bit,
 at bit numbers `XS1_SS_PLL_CTL_NRESET_SHIFT` (31) and
 `XS1_SS_PLL_CTL_NLOCK_SHIFT` (30). Both bits are active low:
 
-* By default, with both bits low, the chip will reset and the same boot
+* By default, with both bits low, the chip will perform a soft reset with
+  the new PLL values and the same boot
   code will execute again. It is important, therefore, that the boot code
   should read the value of the `PLL_CTRL` register and compare it to the
   reconfigured value. If there is a difference, then this is the first time
@@ -207,7 +220,7 @@ at bit numbers `XS1_SS_PLL_CTL_NRESET_SHIFT` (31) and
 * If the *nreset* bit is set high and the *nlock* bit is set low, then the
   PLL clock will be suspended whilst the PLL adapts to the new settings.
   During this time, the chip will not have a clock, and it will be inactive
-  for a short period of time (50 input clocks; typically a few microseconds).
+  for a short period of time (500 input clocks; typically a few microseconds).
 
 * If both *nreset* and *nlock* bits are high, then the PLL will adapt whilst
   the chip is running. This means that the clock will be imprecise for a
@@ -229,12 +242,12 @@ To access the frequency control registers on the *SSwitch* and *PSwitch*, packet
 
 Global PLL settings are controlled through the
 *Node Configuration Registers*.
-From C or XC, use the *write_node_config_reg()* and
-*read_node_config_reg()* functions defined in *xs1.h* header file.
+From `C`, use the *write_sswitch_reg()* and
+*read_sswitch_reg()* functions defined in *xs1.h* header file.
 
 The fields that can be set in the *Node Configuration Registers* that
 control the clocks are shown in the tables below.
-Node control register 6, `XS1_SSWITCH_PLL_CTL_NUM`, controls the PLL settings:
+Node control register 6, `XS1_SSWITCH_PLL_CTL_NUM`, controls the system PLL settings:
 
 .. tabularcolumns:: lrrp{5.5cm}
 
@@ -285,7 +298,7 @@ REFDIV  15:0     4     Reference clock divider = REFDIV+1.
 
 Settings on an individual tile basis are controlled through
 *Tile Configuration Registers*. From `C` use the
-*write_tile_config_reg()* and *read_tile_config_reg()* functions defined in
+*write_pswitch_reg()* and *read_pswitch_reg()* functions defined in
 *xs1.h*.
 The field that can be set to control the clock in the
 *Tile Configuration Registers* is shown in the table below.
@@ -304,8 +317,12 @@ XCDIV   15:0     0     xcore.ai clock divider = XCDIV+1.
 
 .. _xcore_ai_clock_frequency_pll_example_pll_configurations:
 
-The following sections show examples of setting the PLL to different values.
+Setting the tile clock divider does not take effect until the tile itself
+allows the divider to be used, which is achieved by calling::
 
+  setps(XS1_PS_XCORE_CTRL0, 0x10)
+
+The following sections show examples of setting the PLL to different values.
 
 24MHz oscillator
 ================
@@ -354,7 +371,7 @@ and ports will now run on a 300MHz clock that can be divided down to
 Slow switch clock
 =================
 
-For applications where only a single `xcore.ai` device is used, the SSwitch
+For applications where only a single `xcore.ai` tile is used, the SSwitch
 is only used for configuration purposes. Once the system is configured, the
 SSwitch clock can be substantially reduced to save on dynamic power. 1MHz
 is a good option for a low power SSwitch clock because the SSwitch power is
@@ -376,7 +393,7 @@ activating the local divider.
 
 For example, if you wish to run a tile at 250MHz
 from a system frequency of 500MHz, set *XCDIV* to
-*1* and active the local divider by writing *0x10* to *XCORE_CTRL0*:
+*1* and enable the local divider by writing *0x10* to *XCORE_CTRL0*:
 
 .. literalinclude:: ../../app_an02022/src/main.c
   :start-after: // Tile clock half speed start
@@ -481,7 +498,7 @@ Using the fractional divider
 
 The Secondary PLL has an optional fractional divider, register
 `SSWITCH_APP_PLL_FRAC_N_DIVIDER`. When enabled, the fractional
-divider will count a period of input clocks, and over part of this period
+divider will count a period of divided input clocks, and over part of this period
 it will cause the secondary PLL to use a divider *F+1* rather than *F*.
 
 The period *p* and fraction *f* are set through the control register for the
@@ -516,6 +533,20 @@ would be: to divide by 20, and multiply by 38.4. That is,
 .. literalinclude:: ../../app_an02022/src/main.c
   :start-after: // FRAC divider 20 38.4 start
   :end-before: // FRAC divider 20 38.4 end
+
+Keeping jitter low
+++++++++++++++++++
+
+In order to keep jitter low:
+
+* Keep reference(input) divider as low as possible (to keep
+  comprator frequency as high as possible)
+
+* Keep feedback divider as low as possible.
+
+* Keep VCO freq as high as possible.
+
+* If you use the fractional-divider, keep *p* as low as possible.
 
 Using the Secondary PLL for a PHY
 =================================
