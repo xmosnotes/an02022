@@ -139,7 +139,7 @@ SecondaryFrequency none    If present, will cause Secondary PLL to be
                            if this attribute is specified.
 ================== ======= =================================================
 
-The frequency control attributes should be added to the XMLS-element ``<Node>`` within
+The frequency control attributes should be added to the XML-element ``<Node>`` within
 the XN file. Frequencies should be specified with their unit of MHz, kHz or
 Hz, (for example 500MHz, 24576kHz or 6745800Hz). If the frequency control
 attributes are not specified in the XN file, then the XTC tools
