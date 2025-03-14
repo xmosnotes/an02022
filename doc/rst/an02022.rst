@@ -18,8 +18,29 @@ same internal workings.
 The System PLL is driven from a low frequency
 external clock and it's output is used to obtain a high frequency System
 Clock. A set of clock dividers are then used on the system clock
-to derive the clocks for the `xcore` tiles, the switch and the reference
-clock. The Secondary PLL can be used for application purposes, and is
+to derive:
+
+* the clocks for the `xcore` tiles, each tile can run at it's own frequency
+  which is a integer divide of the system clock;
+
+* the switch clock, the switch can run at an integer divide of the system
+  clock;
+
+* the reference clock, which is a 100 MHz clock source that programs can
+  use as their wall clock or a base-clock for input and output. The
+  reference clock is an integer division of the system clock; and
+
+* clocks for MIPI and LPDDR (if used), both of which are also an integer
+  division of the system clock
+
+Typically, the system clock is a multiple of 100 MHz so that it can easily
+drive a reference clock at exactly 100 MHz. There may be cases where one
+wants to clock down below 100 MHz. This can be useful but means that
+software components may need modification to make them function without a
+100 Mhz reference clock. Similarly, if 200 MHz LPDDR is required, the
+system clock must be a multiple of 200 MHz.
+
+The Secondary PLL can be used for application purposes, and is
 driven either from the same external clock source, or from the System PLL.
 
 .. _xcore_ai_clock_frequency_control_clock_dividers:
