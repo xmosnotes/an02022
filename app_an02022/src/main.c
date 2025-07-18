@@ -58,10 +58,10 @@ void frac_divider_29_28(void) {
 unsigned pllCtrlVal;
 
 void pll_bypass_on(void) {
-    #define PLL_VAL_BYPASS   0xE0000000
+    #define PLL_VAL_BYPASS   0xF0000000
     setps(XS1_PS_XCORE_CTRL0,0x10);
     read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM, &pllCtrlVal);
-    write_pswitch_reg(get_local_tile_id(), XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 5);
+    write_pswitch_reg(get_local_tile_id(), XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 0);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM,
                           pllCtrlVal          | PLL_VAL_BYPASS);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM,
