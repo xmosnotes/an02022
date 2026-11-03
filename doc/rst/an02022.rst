@@ -488,7 +488,7 @@ Setting up the Secondary PLL manually
 The secondary PLL is set-up in a similar manner to the System PLL, using
 register 15 rather than register 6. The differences are:
 
-* The secondary PLL must be enabled by clearing bit 27 before writing
+* The secondary PLL must be enabled by setting bit 27 before writing
   to the *F* and *R* parts of the Secondary PLL.
 
 * The *nreset* bit has no meaning, but similar to setting up the System PLL,
