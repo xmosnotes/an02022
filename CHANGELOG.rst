@@ -1,5 +1,12 @@
-AN02003 Changelog
+AN02022 Changelog
 =================
+
+1.2.0
+-----
+
+  * FIXED:     Description of frequencies and dividers
+  * FIXED:     Bit 27 must be set not cleared to enable the APP PLL
+  * FIXED:     The hex values to set the APP PLL
 
 1.1.0
 -----
