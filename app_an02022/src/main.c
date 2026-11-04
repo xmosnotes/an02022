@@ -16,7 +16,7 @@ void set_app_pll(int app_pll_ctl)
     write_sswitch_reg(tile, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, (app_pll_ctl & 0xF7FFFFFF));
     write_sswitch_reg(tile, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, app_pll_ctl);
 }
-// function to set app PLL start
+// function to set app PLL end
 
 void enable_secondary_output_divider_by_4(void) {
     // output divide by 4 start
