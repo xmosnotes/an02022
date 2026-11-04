@@ -505,6 +505,12 @@ either using the clock input to the device as the input to the secondary PLL,
 or the output of the primary PLL. This enables a large slew of
 frequencies to be created.
 
+In order to safely set the PLL value the following code must be used:
+
+.. literalinclude:: ../../app_an02022/src/main.c
+  :start-after: // function to set app PLL start
+  :end-before: // function to set app PLL end
+
 For example, *R* and *OD* can be set to 4 (dividing by 25), and *F* set to 60
 (multiply by 61/2) by writing the following code:
 
