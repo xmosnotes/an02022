@@ -3,6 +3,21 @@
 
 extern int tile[2];
 
+// function to set app PLL start
+// Function to write the APP_PLL_CTL register in a clean way to ensure reliable operation.
+// Need to pass in the desired register value.
+// Wait for 500 us after this function in order for the PLL to lock
+void set_app_pll(int app_pll_ctl)
+{
+    int tile = get_local_tile_id();
+    write_sswitch_reg(tile, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, (app_pll_ctl & 0xF7FFFFFF));
+    write_sswitch_reg(tile, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, app_pll_ctl);
+    write_sswitch_reg(tile, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, app_pll_ctl);
+    write_sswitch_reg(tile, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, (app_pll_ctl & 0xF7FFFFFF));
+    write_sswitch_reg(tile, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, app_pll_ctl);
+}
+// function to set app PLL end
+
 void enable_secondary_output_divider_by_4(void) {
     // output divide by 4 start
     #define APP_CLK_VAL 0x80000003
@@ -26,20 +41,18 @@ void lpddr_app_clock_divide_by_2(void) {
 
 void frac_divider_20_38_4(void) {
     // FRAC divider 20 38.4 start
-    #define PLL_VAL_1 0x02004B03
+    #define PLL_VAL_1 0x0A004B03
     #define PLL_FRACT_VAL_1 0x80000405
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL_1);
+    set_app_pll(PLL_VAL_1);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL_1);
     // FRAC divider 20 38.4 end
 }
 
 void frac_divider_11_25(void) {
     // FRAC divider 11 25 start
-    #define PLL_VAL_2 0x02003C04
+    #define PLL_VAL_2 0x0A003C04
     #define PLL_FRACT_VAL_2 0x80000B19
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL_2);
+    set_app_pll(PLL_VAL_2);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL_2);
     // FRAC divider 11 25 end
 }
@@ -47,9 +60,8 @@ void frac_divider_11_25(void) {
 
 void frac_divider_29_28(void) {
     // APP PLL 29.28 start
-    #define PLL_VAL 0x02003C04
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0); // Enable
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_CTL_NUM, PLL_VAL);
+    #define PLL_VAL 0x0A003C04
+    set_app_pll(PLL_VAL);
     // APP PLL 29.28 end
 }
 
