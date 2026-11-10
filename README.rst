@@ -54,7 +54,7 @@ Required libraries (dependencies)
 Related application notes
 *************************
 
-* AN02023: XCORE.AI Power Consumption Estimation
+* `AN02023: XCORE.AI Power Consumption Estimation <https://www.xmos.com/application-notes/an02023>`_
 
 *******
 Support
@@ -62,4 +62,3 @@ Support
 
 This package is supported by XMOS Ltd. Issues can be raised against the software at
 `www.xmos.com/support <https://www.xmos.com/support>`_ or using GitHub `issues <https://github.com/xmosnotes/an02022/issues>`_.
-
