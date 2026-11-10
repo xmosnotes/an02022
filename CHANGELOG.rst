@@ -1,12 +1,13 @@
-AN02022 Changelog
-=================
+an02022 change log
+==================
 
 1.2.0
 -----
 
   * FIXED:     Description of frequencies and dividers
-  * FIXED:     Bit 27 must be set not cleared to enable the APP PLL
-  * FIXED:     The hex values to set the APP PLL
+  * FIXED:     Bit 27 must be set not cleared to enable the Secondary PLL (#13)
+  * FIXED:     The hex values to set the Secondary PLL
+  * FIXED:     XN oscillator frequency set to 24 MHz to match XK-EVK-XU316 (#21)
 
 1.1.0
 -----
@@ -24,3 +25,4 @@ AN02022 Changelog
 -----
 
   * Initial public release
+

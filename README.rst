@@ -1,51 +1,65 @@
 :orphan:
 
 #########################################
-AN02022: xcore.ai Clock Frequency Control
+AN02022: XCORE.AI Clock Frequency Control
 #########################################
 
 :vendor: XMOS
-:version: 1.1.0
+:version: 1.2.0
 :scope: Example
-:description: How to control xcore.ai PLL's
-:category: Core
-:keywords: PLL, clocking, MIPI, power, LPDDR
+:description: How to control XCORE.AI PLL's
+:category: Core & system
+:keywords: Clocking, IO, Power, Memory
 :hardware: XK-EVK-XU316
 
-Overview
-********
+*******
+Summary
+*******
 
 This note describes the PLLs in `xcore.ai` devices and how to control them.
 
-Key Features
+********
+Features
+********
+
+* Documentation of System and Secondary ('Application') PLLs
+* Documentation of clocking LPDDR/MIPI
+* Example application demonstrating the various concepts documented
+
+************
+Known issues
 ************
 
-  * Documentation of System and Secondary ('Application') PLLs
-  * Documentation of clocking LPDDR/MIPI
-  * Example application demonstrating the various concepts documented
+* None
 
-Known Issues
-************
+****************
+Development repo
+****************
 
-  * None
+* `an02022 <https://www.github.com/xmosnotes/an02022>`_ (https://www.github.com/xmosnotes/an02022)
 
-Required Tools
+**************
+Required tools
 **************
 
-  * XMOS XTC Tools: 15.3.0
+* XMOS XTC Tools: 15.3.1
 
-Required Libraries (Dependencies)
+*********************************
+Required libraries (dependencies)
 *********************************
 
-  * None
+* None
 
-Related Notes
-*************
+*************************
+Related application notes
+*************************
 
-  * AN02023: xcore.ai Power Consumption Estimation
+* AN02023: XCORE.AI Power Consumption Estimation
 
+*******
 Support
 *******
 
-This package is supported by XMOS Ltd. Issues can be raised against the software at: http://www.xmos.com/support
+This package is supported by XMOS Ltd. Issues can be raised against the software at
+`www.xmos.com/support <https://www.xmos.com/support>`_ or using GitHub `issues <https://github.com/xmosnotes/an02022/issues>`_.
 

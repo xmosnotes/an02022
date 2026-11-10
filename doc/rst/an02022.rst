@@ -1,7 +1,7 @@
 .. _xcore_ai_clock_frequency_control:
 
 #########################################
-AN02022: xcore.ai Clock Frequency Control
+AN02022: XCORE.AI Clock Frequency Control
 #########################################
 
 .. _xcore_ai_clock_frequency_pll_clock_divider_overview:
@@ -10,7 +10,7 @@ AN02022: xcore.ai Clock Frequency Control
 PLL and Clock Divider Overview
 ******************************
 
-`xcore.ai` devices have two internal phase locked loops (PLLs): the System PLL
+`XCORE.AI` devices have two internal phase locked loops (PLLs): the System PLL
 (sometimes known as the Core PLL or Primary PLL) and the Secondary PLL
 (sometimes known as the Application PLL). Both PLLs have the
 same internal workings.
@@ -20,7 +20,7 @@ external clock and it's output is used to obtain a high frequency System
 Clock. A set of clock dividers are then used on the system clock
 to derive:
 
-* the clocks for the `xcore` tiles, each tile can run at it's own frequency
+* the clocks for the `XCORE` tiles, each tile can run at it's own frequency
   which is a integer divide of the system clock;
 
 * the switch clock, the switch can run at an integer divide of the system
@@ -69,14 +69,14 @@ PLL Constraints
 ===============
 
 There are a number of constraints on the frequencies of clocks at different
-points on the `xcore.ai` devices. These constraints must be met for the
+points on the `XCORE.AI` devices. These constraints must be met for the
 initial boot sequence, and if either PLL is reprogrammed, for the reprogrammed
 values too:
 
 * The input clock on `XIN` must be between 8 and 30 MHz
 
   If using a crystal, it is suggested that a 24 or 25 MHz crystal is used as they
-  are readily available, and are supported by the USB PHY.
+  are readily available, and are supported by the internal USB PHY.
 
 * VCO frequency must be between 360 and 1800 MHz.
 
@@ -123,9 +123,11 @@ Static configuration of the PLLs through the XN File
 
 For the vast majority of applications, the tools can be used to set up the
 PLLs.
-The application's input oscillator frequency, system frequency, reference frequency and secondary frequency can be specified in the XN file as shown in table below . When the application code is written to a flash
-device with XFLASH, the code to reprogram the PLL to the desired system and
-reference frequencies will be added automatically into the boot sequence.
+The application's input oscillator frequency, system frequency, reference frequency and
+secondary frequency can be specified in the XN file as shown in table below .
+When the application code is written to a flash device with XFLASH, the code to reprogram the
+PLL to the desired system and reference frequencies will be added automatically into the boot
+sequence.
 When run with XRUN or XGDB the PLL is automatically reprogrammed via JTAG.
 
 .. tabularcolumns:: p{8em}p{4em}p{6.8cm}
@@ -195,13 +197,13 @@ decide how to set the LPDDR divider and its mux to achieve the desired frequency
     system usage.
 
 See the application note on adding external memory,
-`AN02021: Using external memory on xcore.ai <http://www.xmos.com/file/an02021>`_,
+`AN02021: Using external memory on XCORE.AI <http://www.xmos.com/application-notes/an02021>`_,
 for details.
 
 .. _xcore_ai_clock_frequency_pll_configuring_device:
 
 ***********************************************
-Configuring the system PLL of xcore.ai manually
+Configuring the system PLL of XCORE.AI manually
 ***********************************************
 
 The initial System PLL settings used after reset are:
@@ -259,7 +261,8 @@ the PLL, as previously discussed.
 Frequency Control Registers for the System Frequency
 ====================================================
 
-To access the frequency control registers on the *SSwitch* and *PSwitch*, packets of data must be constructed and communicated to the switches through a channel end.
+To access the frequency control registers on the *SSwitch* and *PSwitch*, packets of data must be
+constructed and communicated to the switches through a channel end.
 
 Global PLL settings are controlled through the
 *Node Configuration Registers*.
@@ -330,7 +333,7 @@ Tile control regiser 6, `XS1_PSWITCH_PLL_CLK_DIVIDER_NUM`, controls the divider 
 ======= ======== ===== ==============================================
 Field   Bits     Reset Description
 ======= ======== ===== ==============================================
-XCDIV   15:0     0     xcore.ai clock divider = XCDIV+1.
+XCDIV   15:0     0     XCORE.AI clock divider = XCDIV+1.
                        The reset value produces 500MHz for a
                        500MHz system clock
 ======= ======== ===== ==============================================
@@ -388,11 +391,10 @@ to run at half the system frequency. For example, if your system frequency is 60
 and ports will now run on a 300MHz clock that can be divided down to
 150MHz, 75MHz and so on.
 
-
 Slow switch clock
 =================
 
-For applications where only a single `xcore.ai` tile is used, the SSwitch
+For applications where only a single `XCORE.AI` tile is used, the SSwitch
 is only used for configuration purposes. Once the system is configured, the
 SSwitch clock can be substantially reduced to save on dynamic power. 1MHz
 is a good option for a low power SSwitch clock because the SSwitch power is
@@ -405,7 +407,7 @@ To reduce the SSwitch clock to 1MHz with a system clock of 500MHz, set
   :start-after: // Switch clock low speed start
   :end-before: // Switch clock low speed end
 
-xcore Tile Clock 200MHz
+XCORE Tile Clock 250MHz
 =======================
 
 If your application does not need to run the `xcore` tile at full speed to
@@ -441,7 +443,7 @@ value, and the dominant power will be leakage and any dynamic power used.
 This mode enables the device to comply with USB suspend.
 
 More details on low-power operation are in the application note on power
-estimation, `AN02023: xcore.ai Power Consumption Estimation <http://www.xmos.com/file/an02023>`_.
+estimation, `AN02023: XCORE.AI Power Consumption Estimation <http://www.xmos.com/file/an02023>`_.
 
 *****************************
 Configuring the Secondary PLL
@@ -638,10 +640,10 @@ Further reading
 
 * `XU316-1024-FB265 datasheet <https://www.xmos.com/?s=XM-014035-PC>`_
 
-* `xcore.ai Power Consumption Estimation <http://www.xmos.com/file/an02023>`_
+* `XCORE.AI Power Consumption Estimation <http://www.xmos.com/file/an02023>`_
 
 * `lib_sw_pll <https://www.xmos.com/file/lib_sw_pll>`_: A software library that, using the
-  `xcore.ai` Application PLL, provides a PLL that will generate a clock that is phase-locked to an
+  `XCORE.AI` Application PLL, provides a PLL that will generate a clock that is phase-locked to an
   input clock.
 
 |newpage|

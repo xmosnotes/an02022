@@ -1,8 +1,8 @@
-# This file relates to internal XMOS infrastructure and should be ignored by users
+# This file relates to internal XMOS infrastructure and should be ignored by external users
 
 an_number: AN02022
 project: '{{an_number}}'
-title: '{{an_number}}: xcore.ai Clock Frequency Control'
+title: '{{an_number}}: XCORE.AI Clock Frequency Control'
 version: 1.2.0
 
 documentation:
