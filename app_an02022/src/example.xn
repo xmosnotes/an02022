@@ -15,7 +15,7 @@
         <Node Id="0" InPackageId="0" Type="XS3-L16A-1024"
               SystemFrequency="500MHz"
               ReferenceFrequency="100MHz"
-              Oscillator="20Mhz">
+              Oscillator="24MHz">
           <Tile Number="0" Reference="tile[0]"/>
           <Tile Number="1" Reference="tile[1]"/>
         </Node>
