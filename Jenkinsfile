@@ -1,85 +1,103 @@
 // This file relates to internal XMOS infrastructure and should be ignored by external users
 
-@Library('xmos_jenkins_shared_library@v0.33.0')
-
-def runningOn(machine) {
-    println 'Stage running on:'
-    println machine
-}
-
-def buildDocs(String repoName) {
-    withVenv {
-        sh "pip install git+ssh://git@github.com/xmos/xmosdoc@v${params.XMOSDOC_VERSION}"
-        sh 'xmosdoc'
-        zip zipFile: "${repoName}_docs.zip", archive: true, dir: 'doc/_build'
-    }
-}
-
-def archiveSandbox(String repoName) {
-    sh "rm -rf .get_tools .venv"
-    sh "git -C ${repoName} clean -xdf"
-    zip zipFile: "${repoName}_sw.zip", archive: true, defaultExcludes: false
-}
+@Library('xmos_jenkins_shared_library@v0.56.0') _
 
 getApproval()
 pipeline {
-    agent {label 'documentation'}
-    environment {
-      REPO_NAME = 'an02022'
-    }
+
+    agent none
+
     parameters {
-      string(
-        name: 'TOOLS_VERSION',
-        defaultValue: '15.3.0',
-        description: 'XTC tools version'
-      )
-      string(
-        name: 'XMOSDOC_VERSION',
-        defaultValue: '6.0.0',
-        description: 'xmosdoc version'
-      )
-    } // parameters
+        string(
+            name: 'TOOLS_VERSION',
+            defaultValue: '15.3.1',
+            description: 'XTC tools version'
+        )
+        string(
+            name: 'XMOSDOC_VERSION',
+            defaultValue: 'v8.1.2',
+            description: 'xmosdoc version'
+        )
+        string(
+            name: 'INFR_APPS_VERSION',
+            defaultValue: 'feature/app-note-development-repo',
+            description: 'The infr_apps version'
+        )
+    }
 
     options {
         skipDefaultCheckout()
         timestamps()
         buildDiscarder(xmosDiscardBuildSettings(onlyArtifacts = false))
-    } // options
+    }
 
     stages {
-      stage('Checkout') {
-        steps{
-          runningOn(env.NODE_NAME)
-          dir(REPO_NAME) {
-            withTools(params.TOOLS_VERSION) {
-              checkout scm
-              createVenv()
-            } // tools
-          } // dir
-        } // steps
-      } // checkout
+        stage('🏗️ Build and test') {
+            agent {
+                label "documentation"
+            }
 
-      stage('Code Build') {
-        steps{
-          dir(REPO_NAME) { withTools(params.TOOLS_VERSION) { withVenv {
-            sh "cmake -G 'Unix Makefiles' -B build -DDEPS_CLONE_SHALLOW=TRUE"
-            sh 'xmake -C build'
-          } } } // venv, tools, dir
-        } // steps
-      } // build
+            stages {
+                stage('Checkout') {
+                    steps {
 
-      stage('Doc Build') {
-        steps {
-          dir(REPO_NAME) { withTools(params.TOOLS_VERSION) { withVenv {
-            buildDocs(REPO_NAME)
-          } } } // venv, tools, dir
-        } // steps
-      } // docs
+                        println "Stage running on ${env.NODE_NAME}"
 
-      stage("Archive Sandbox") {
-        steps {archiveSandbox(REPO_NAME)} // steps
-      } // archive
+                        script {
+                            def (server, user, repo) = extractFromScmUrl()
+                            env.REPO_NAME = repo
+                        }
 
+                        dir(REPO_NAME) {
+                            checkoutScmShallow()
+                        }
+                    }
+                }
+
+                stage('Code build') {
+                    steps {
+                        dir(REPO_NAME) {
+                            xcoreBuild()
+                        }
+                    }
+                }
+
+                stage('Repo checks') {
+                    steps {
+                        warnError("Repo checks failed") {
+                            runRepoChecks("${WORKSPACE}/${REPO_NAME}")
+                        }
+                    }
+                }
+
+                stage('Doc build') {
+                    steps {
+                        dir(REPO_NAME) {
+                            buildDocs()
+                        }
+                    }
+                }
+
+                stage("Archive sandbox") {
+                    steps {
+                        archiveSandbox(REPO_NAME)
+                    }
+                }
+            } // stages
+            post {
+                cleanup {
+                    xcoreCleanSandbox()
+                }
+            }
+        } // stage 'Build and test'
+
+        stage('🚀 Release') {
+            when {
+                expression { triggerRelease.isReleasable() }
+            }
+            steps {
+                triggerRelease()
+            }
+        }
     } // stages
-    post {cleanup {cleanWs()}} // post
 } // pipeline
