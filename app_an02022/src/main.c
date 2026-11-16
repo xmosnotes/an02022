@@ -23,7 +23,7 @@ void set_app_pll(int app_pll_ctl)
 
 void enable_secondary_output_divider_by_4(void) {
     // output divide by 4 start
-    #define APP_CLK_VAL 0x80000003
+    #define APP_CLK_VAL 0x80000001   // divides by 2 (N + 1) = 4
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM, APP_CLK_VAL);
     // output divide by 4 end
 }
