@@ -80,7 +80,7 @@ void pll_bypass_on(void) {
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM,
                           pllCtrlVal          | PLL_VAL_BYPASS);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM,
-                          (pllCtrlVal& ~0xFFF)| PLL_VAL_BYPASS);
+                          (pllCtrlVal& ~0x1FFFFF)| PLL_VAL_BYPASS);
 }
 
 void pll_bypass_off(void) {
