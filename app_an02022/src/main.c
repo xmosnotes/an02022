@@ -136,6 +136,9 @@ void flip_system_clock_once_24() {
 }
 
 int main(void) {
+    // Note: normally only one of these is called. Each of them only write the specific
+    // registers that need setting, and does not undo any of the previous settings
+    
     //flip_system_clock_once_12();
     flip_system_clock_once_24();
     enable_secondary_output_divider_by_4();
