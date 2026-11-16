@@ -23,6 +23,7 @@ void set_app_pll(int app_pll_ctl)
 
 void enable_secondary_output_divider_by_4(void) {
     // output divide by 4 start
+    // This code assumes that the secondary PLL has been set up
     #define APP_CLK_VAL 0x80000001   // divides by 2 (N + 1) = 4
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM, APP_CLK_VAL);
     // output divide by 4 end
@@ -30,6 +31,7 @@ void enable_secondary_output_divider_by_4(void) {
 
 void mipi_app_clock_divide_by_2(void) {
     // MIPI clock divider by 2 start
+    // This code assumes that the secondary PLL has been set up
     #define MIPI_CLK_VAL 0x80000000
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_MIPI_CLK_DIVIDER_NUM, MIPI_CLK_VAL);
     // MIPI clock divider by 2 end
@@ -37,6 +39,7 @@ void mipi_app_clock_divide_by_2(void) {
 
 void lpddr_app_clock_divide_by_2(void) {
     // LPDDR clock divider by 4 start
+    // This code assumes that the secondary PLL has been set up
     #define DDR_CLK_VAL 0x80000001
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_DDR_CLK_DIVIDER_NUM, DDR_CLK_VAL);
     // LPDDR clock divider by 4 end
@@ -137,7 +140,9 @@ void flip_system_clock_once_24() {
 
 int main(void) {
     // Note: normally only one of these is called. Each of them only write the specific
-    // registers that need setting, and does not undo any of the previous settings
+    // registers that need setting, and does not undo any of the previous settings.
+    // These are meant as code snippets that can be used as examples; it is not a single
+    // working main program.
     
     //flip_system_clock_once_12();
     flip_system_clock_once_24();
