@@ -367,8 +367,8 @@ similar to the following:
 
 For the initial boot, the system clock will be 200MHz, with a 40 MHz
 reference clock. The following are required: *R* = 0, *F* = 249, *OD*
-= 2. Write *0x0100F700* to *SSCTRL*, *PLL_CTRL* (0x6) register to
-bring the PLL output up to 400MHz, with code similar to the following:
+= 2. Write *0x0100F900* to *SSCTRL*, *PLL_CTRL* (0x6) register to
+bring the PLL output up to 500MHz, with code similar to the following:
 
 .. literalinclude:: ../../app_an02022/src/main.c
   :start-after: // Flip system clock to new value 12 on reset start

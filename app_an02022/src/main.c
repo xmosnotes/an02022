@@ -114,7 +114,7 @@ void ref_clock_max_speed() {
 void flip_system_clock_once_12() {
     // Flip system clock to new value 12 on reset start
     // This code should be called early on in main once
-    #define PLL_VAL_12MHz 0x0100F700
+    #define PLL_VAL_12MHz 0x0100F900
     unsigned oldValue;
     read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM, &oldValue);
     if (oldValue != PLL_VAL_12MHz) {
