@@ -32,12 +32,6 @@ Known issues
 
 * None
 
-****************
-Development repo
-****************
-
-* `an02022 <https://www.github.com/xmosnotes/an02022>`_ (https://www.github.com/xmosnotes/an02022)
-
 **************
 Required tools
 **************
