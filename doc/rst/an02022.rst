@@ -513,14 +513,14 @@ In order to safely set the PLL value the following code must be used:
   :start-after: // function to set app PLL start
   :end-before: // function to set app PLL end
 
-For example, *R* and *OD* can be set to 4 (dividing by 25), and *F* set to 60
-(multiply by 61/2) by writing the following code:
+For example, *R* and *OD* can be set to 4 (dividing by 25), and *F* set to 240
+(multiply by 241/2) by writing the following code:
 
 .. literalinclude:: ../../app_an02022/src/main.c
-  :start-after: // APP PLL 29.28 start
-  :end-before: // APP PLL 29.28 end
+  :start-after: // APP PLL 115.68 start
+  :end-before: // APP PLL 115.68 end
 
-With a 24 MHz clock, this will give a 24/25*61 = 29.28 MHz output clock.
+With a 24 MHz clock, this will give a 24*(240+1)/2/(4+1)/(4+1) = 115.68 MHz output clock.
 
 Using the fractional divider
 ============================
@@ -543,7 +543,7 @@ achieved directly: because the maximum output divider is 8 this would be a
 VCO frequency of at least 196.608 MHz which is too low.
 
 To solve the latter problem first we will create a clock of 4 x 24.576 =
-98.304 MHz. We can then use the application clock divicder to divider it by
+98.304 MHz. We can then use the application clock divider to divide it by
 4 and get the desired 24.576 MHz.
 
 In order to create a division of 625, we observe that we can divide by 25

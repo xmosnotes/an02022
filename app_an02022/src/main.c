@@ -64,11 +64,11 @@ void frac_divider_19_25(void) {
 }
 
 
-void frac_divider_29_28(void) {
-    // APP PLL 29.28 start
-    #define PLL_VAL 0x0A003C04
+void frac_divider_115_68(void) {
+    // APP PLL 115.68 start
+    #define PLL_VAL 0x0A00F004
     set_app_pll(PLL_VAL);
-    // APP PLL 29.28 end
+    // APP PLL 115.68 end
 }
 
 
@@ -151,7 +151,7 @@ int main(void) {
     lpddr_app_clock_divide_by_2();
     frac_divider_20_38_4();
     frac_divider_19_25();
-    frac_divider_29_28();
+    frac_divider_115_68();
     pll_bypass_on();
     pll_bypass_off();
     tile_clock_250_MHz();
