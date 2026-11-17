@@ -367,8 +367,8 @@ similar to the following:
 
 For the initial boot, the system clock will be 200MHz, with a 40 MHz
 reference clock. The following are required: *R* = 0, *F* = 249, *OD*
-= 2. Write *0x0100F700* to *SSCTRL*, *PLL_CTRL* (0x6) register to
-bring the PLL output up to 400MHz, with code similar to the following:
+= 2. Write *0x0100F900* to *SSCTRL*, *PLL_CTRL* (0x6) register to
+bring the PLL output up to 500MHz, with code similar to the following:
 
 .. literalinclude:: ../../app_an02022/src/main.c
   :start-after: // Flip system clock to new value 12 on reset start
@@ -513,14 +513,14 @@ In order to safely set the PLL value the following code must be used:
   :start-after: // function to set app PLL start
   :end-before: // function to set app PLL end
 
-For example, *R* and *OD* can be set to 4 (dividing by 25), and *F* set to 60
-(multiply by 61/2) by writing the following code:
+For example, *R* and *OD* can be set to 4 (dividing by 25), and *F* set to 240
+(multiply by 241/2) by writing the following code:
 
 .. literalinclude:: ../../app_an02022/src/main.c
-  :start-after: // APP PLL 29.28 start
-  :end-before: // APP PLL 29.28 end
+  :start-after: // APP PLL 115.68 start
+  :end-before: // APP PLL 115.68 end
 
-With a 24 MHz clock, this will give a 24/25*61 = 29.28 MHz output clock.
+With a 24 MHz clock, this will give a 24*(240+1)/2/(4+1)/(4+1) = 115.68 MHz output clock.
 
 Using the fractional divider
 ============================
@@ -538,30 +538,30 @@ than *p* at all times.
 For example, supposing a crystal of 20 MHz, and the desired
 output frequency of 24.576 MHz. A multiplier of 768 (3 *
 2^8), and a divider of 625 is required. A division by 625 cannot be achieved given the
-limitations of the PLL.
+limitations of the PLL. Also, an output frequency of 24.576 MHz cannot be
+achieved directly: because the maximum output divider is 8 this would be a
+VCO frequency of at least 196.608 MHz which is too low.
 
-Instead, a division of 25 can be created, and a multiply by 30.72. That is,
-set both *R* and *OD* to 4, as *(4+1)*(4+1) = 25*, and then setting
-*F* as follows: *(F+1+f/p)/2 = 30.72*, hence *F+1+f/p = 61.44*, hence *F=60*,
-*f=44* and *p=100*. Although this will work, this can be improved further
+To solve the latter problem first we will create a clock of 4 x 24.576 =
+98.304 MHz. We can then use the application clock divider to divide it by
+4 and get the desired 24.576 MHz.
+
+In order to create a division of 625, we observe that we can divide by 25
+by setting both *R* and *OD* to 4, as *(4+1)x(4+1) = 25*. This will require a VCO
+frequency of 491.52 MHz (5 x 98.304), and we need an F value such that
+20 x (F+1+f/p)/2 / (4+1) = 491.52, ie, F+1+f/p = 245.76. Hence, *F=244*,
+*f=76* and *p=100*. Although this will work, this can be improved further
 as large values of *p* lead to a lot of jitter. The
-common factor of four can be divided out in both *p* and *f*, and use *f=11*, *p=25*.
+common factor of four can be divided out in both *p* and *f*, and use *f=19*, *p=25*.
 
 This is written to the registers with the following code:
 
 .. literalinclude:: ../../app_an02022/src/main.c
-  :start-after: // FRAC divider 11 25 start
-  :end-before: // FRAC divider 11 25 end
+  :start-after: // FRAC divider 19 25 start
+  :end-before: // FRAC divider 19 25 end
 
 Fractional control will create jitter - the smaller the value of *p*, the
-less jitter there will be. Another solution with the same constraints
-would be: to divide by 20, and multiply by 38.4. That is,
-*(F+1+f/p)/2 = 38.4*, hence *F+1+f/p = 76.8*, hence *F=75*,
-*f=4* and *p=5*:
-
-.. literalinclude:: ../../app_an02022/src/main.c
-  :start-after: // FRAC divider 20 38.4 start
-  :end-before: // FRAC divider 20 38.4 end
+less jitter there will be.
 
 Keeping jitter low
 ==================

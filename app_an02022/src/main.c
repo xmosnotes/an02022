@@ -23,13 +23,15 @@ void set_app_pll(int app_pll_ctl)
 
 void enable_secondary_output_divider_by_4(void) {
     // output divide by 4 start
-    #define APP_CLK_VAL 0x80000003
+    // This code assumes that the secondary PLL has been set up
+    #define APP_CLK_VAL 0x80000001   // divides by 2 (N + 1) = 4
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM, APP_CLK_VAL);
     // output divide by 4 end
 }
 
 void mipi_app_clock_divide_by_2(void) {
     // MIPI clock divider by 2 start
+    // This code assumes that the secondary PLL has been set up
     #define MIPI_CLK_VAL 0x80000000
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_MIPI_CLK_DIVIDER_NUM, MIPI_CLK_VAL);
     // MIPI clock divider by 2 end
@@ -37,35 +39,27 @@ void mipi_app_clock_divide_by_2(void) {
 
 void lpddr_app_clock_divide_by_2(void) {
     // LPDDR clock divider by 4 start
+    // This code assumes that the secondary PLL has been set up
     #define DDR_CLK_VAL 0x80000001
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_DDR_CLK_DIVIDER_NUM, DDR_CLK_VAL);
     // LPDDR clock divider by 4 end
 }
 
-void frac_divider_20_38_4(void) {
-    // FRAC divider 20 38.4 start
-    #define PLL_VAL_1 0x0A004B03
-    #define PLL_FRACT_VAL_1 0x80000405
-    set_app_pll(PLL_VAL_1);
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL_1);
-    // FRAC divider 20 38.4 end
-}
-
-void frac_divider_11_25(void) {
-    // FRAC divider 11 25 start
-    #define PLL_VAL_2 0x0A003C04
-    #define PLL_FRACT_VAL_2 0x80000B19
+void frac_divider_19_25(void) {
+    // FRAC divider 19 25 start
+    #define PLL_VAL_2 0x0A00F404
+    #define PLL_FRACT_VAL_2 0x80001218
     set_app_pll(PLL_VAL_2);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL_2);
-    // FRAC divider 11 25 end
+    // FRAC divider 19 25 end
 }
 
 
-void frac_divider_29_28(void) {
-    // APP PLL 29.28 start
-    #define PLL_VAL 0x0A003C04
+void frac_divider_115_68(void) {
+    // APP PLL 115.68 start
+    #define PLL_VAL 0x0A00F004
     set_app_pll(PLL_VAL);
-    // APP PLL 29.28 end
+    // APP PLL 115.68 end
 }
 
 
@@ -73,14 +67,14 @@ void frac_divider_29_28(void) {
 unsigned pllCtrlVal;
 
 void pll_bypass_on(void) {
-    #define PLL_VAL_BYPASS   0xF0000000
+    #define PLL_VAL_BYPASS   0xD0000000  // No reset, no lock wait, bypass-enable
     setps(XS1_PS_XCORE_CTRL0,0x10);
     read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM, &pllCtrlVal);
     write_pswitch_reg(get_local_tile_id(), XS1_PSWITCH_PLL_CLK_DIVIDER_NUM, 0);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM,
                           pllCtrlVal          | PLL_VAL_BYPASS);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM,
-                          (pllCtrlVal& ~0xFFF)| PLL_VAL_BYPASS);
+                          (pllCtrlVal& ~0x1FFFFF)| PLL_VAL_BYPASS);
 }
 
 void pll_bypass_off(void) {
@@ -88,7 +82,7 @@ void pll_bypass_off(void) {
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM,
                           pllCtrlVal | PLL_VAL_BYPASS);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM,
-                          pllCtrlVal | 0xC0000000    );
+                          pllCtrlVal | 0x80000000    );
 }
 // PLL bypass end
 
@@ -114,7 +108,7 @@ void ref_clock_max_speed() {
 void flip_system_clock_once_12() {
     // Flip system clock to new value 12 on reset start
     // This code should be called early on in main once
-    #define PLL_VAL_12MHz 0x0100F700
+    #define PLL_VAL_12MHz 0x0100F900
     unsigned oldValue;
     read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM, &oldValue);
     if (oldValue != PLL_VAL_12MHz) {
@@ -136,14 +130,18 @@ void flip_system_clock_once_24() {
 }
 
 int main(void) {
+    // Note: normally only one of these is called. Each of them only write the specific
+    // registers that need setting, and does not undo any of the previous settings.
+    // These are meant as code snippets that can be used as examples; it is not a single
+    // working main program.
+    
     //flip_system_clock_once_12();
     flip_system_clock_once_24();
     enable_secondary_output_divider_by_4();
     mipi_app_clock_divide_by_2();
     lpddr_app_clock_divide_by_2();
-    frac_divider_20_38_4();
-    frac_divider_11_25();
-    frac_divider_29_28();
+    frac_divider_19_25();
+    frac_divider_115_68();
     pll_bypass_on();
     pll_bypass_off();
     tile_clock_250_MHz();
