@@ -54,13 +54,13 @@ void frac_divider_20_38_4(void) {
     // FRAC divider 20 38.4 end
 }
 
-void frac_divider_11_25(void) {
-    // FRAC divider 11 25 start
-    #define PLL_VAL_2 0x0A003C04
-    #define PLL_FRACT_VAL_2 0x80000A18
+void frac_divider_19_25(void) {
+    // FRAC divider 19 25 start
+    #define PLL_VAL_2 0x0A00F404
+    #define PLL_FRACT_VAL_2 0x80001218
     set_app_pll(PLL_VAL_2);
     write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, PLL_FRACT_VAL_2);
-    // FRAC divider 11 25 end
+    // FRAC divider 19 25 end
 }
 
 
@@ -150,7 +150,7 @@ int main(void) {
     mipi_app_clock_divide_by_2();
     lpddr_app_clock_divide_by_2();
     frac_divider_20_38_4();
-    frac_divider_11_25();
+    frac_divider_19_25();
     frac_divider_29_28();
     pll_bypass_on();
     pll_bypass_off();
