@@ -561,14 +561,7 @@ This is written to the registers with the following code:
   :end-before: // FRAC divider 19 25 end
 
 Fractional control will create jitter - the smaller the value of *p*, the
-less jitter there will be. Another solution with the same constraints
-would be: to divide by 20, and multiply by 38.4. That is,
-*(F+1+f/p)/2 = 38.4*, hence *F+1+f/p = 76.8*, hence *F=75*,
-*f=4* and *p=5*:
-
-.. literalinclude:: ../../app_an02022/src/main.c
-  :start-after: // FRAC divider 20 38.4 start
-  :end-before: // FRAC divider 20 38.4 end
+less jitter there will be.
 
 Keeping jitter low
 ==================
